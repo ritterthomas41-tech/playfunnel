@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>La Course aux Viennoiseries — démo Playfunnel</title>
+<meta name="description" content="Démo Playfunnel : un mini-jeu à vos couleurs, joué en scannant un QR code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Work+Sans:wght@400;600;700&display=swap">
+<style>
+/* Démo Playfunnel : un mini-jeu de commerce, joué au doigt. Personnalisable par l'URL :
+   ?nom=Boulangerie%20Martin&couleur=%23c0392b&offre=-10%25%20sur%20votre%20prochaine%20visite */
+:root { --marque: #c8571b; --encre: #23160f; --creme: #fff4e2; --ok: #2f8f4e; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: #1a120c; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+body { font-family: "Work Sans", system-ui, sans-serif; color: var(--encre); }
+#cadre { position: relative; height: 100%; max-height: 100dvh; aspect-ratio: 9 / 16; max-width: 100vw; margin: 0 auto; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+.ecran { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 22px; text-align: center; background: rgba(26, 18, 12, .62); }
+.ecran[hidden] { display: none !important; }
+.carte { background: var(--creme); border: 4px solid var(--encre); border-radius: 14px; padding: 20px 18px; width: 100%; max-width: 340px; box-shadow: 0 6px 0 var(--encre); display: flex; flex-direction: column; gap: 12px; }
+.enseigne { font-family: "Silkscreen", monospace; font-size: 13px; letter-spacing: .06em; color: var(--marque); text-transform: uppercase; }
+h1 { font-family: "Silkscreen", monospace; font-weight: 700; font-size: clamp(15px, 5.6vw, 26px); line-height: 1.1; margin: 0; }
+p { margin: 0; line-height: 1.4; font-size: 15px; }
+.gros { font-family: "Silkscreen", monospace; font-size: 46px; line-height: 1; color: var(--marque); }
+button { font: 700 18px "Work Sans", sans-serif; color: #fff; background: var(--marque); border: 3px solid var(--encre); border-radius: 12px; padding: 14px 18px; box-shadow: 0 4px 0 var(--encre); cursor: pointer; }
+button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--encre); }
+button.secondaire { background: transparent; color: var(--encre); box-shadow: none; border-width: 2px; font-size: 15px; padding: 10px; }
+input[type=email] { font: 16px "Work Sans", sans-serif; padding: 12px; border: 2px solid var(--encre); border-radius: 10px; width: 100%; background: #fff; }
+label.consent { display: flex; gap: 8px; align-items: flex-start; text-align: left; font-size: 12.5px; line-height: 1.35; }
+label.consent input { margin-top: 2px; width: 18px; height: 18px; flex: none; accent-color: var(--marque); }
+.bon { border: 3px dashed var(--marque); border-radius: 12px; padding: 14px; background: #fff; }
+.bon .code { font-family: "Silkscreen", monospace; font-size: 24px; letter-spacing: .08em; }
+.petit { font-size: 12px; opacity: .8; }
+.signature { position: absolute; left: 0; right: 0; bottom: 8px; font-size: 11px; color: #fff; opacity: .75; text-align: center; pointer-events: none; }
+.signature b { font-family: "Silkscreen", monospace; font-weight: 400; }
+#hud { position: absolute; top: 12px; left: 14px; right: 14px; display: flex; justify-content: space-between; font-family: "Silkscreen", monospace; font-size: 28px; color: #fff; text-shadow: 0 3px 0 var(--encre), 2px 0 0 var(--encre), -2px 0 0 var(--encre), 0 -2px 0 var(--encre); pointer-events: none; }
+.erreur { color: #b3261e; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="cadre">
+  <canvas id="jeu" width="224" height="400" aria-label="Jeu : attrapez les viennoiseries"></canvas>
+  <div id="hud" hidden><span id="score">0</span><span id="temps">20</span></div>
+
+  <div class="ecran" id="accueil">
+    <div class="carte">
+      <div class="enseigne" id="nomCommerce">La Boulangerie du Coin</div>
+      <h1>La course aux viennoiseries</h1>
+      <p>Attrapez un maximum de viennoiseries avec le panier en <b>20 secondes</b>. À la clé : <b id="offreAccueil">une récompense</b> !</p>
+      <button id="jouer">Jouer</button>
+      <p class="petit">Glissez le doigt pour bouger le panier.</p>
+    </div>
+  </div>
+
+  <div class="ecran" id="fin" hidden>
+    <div class="carte">
+      <div class="enseigne">Partie terminée</div>
+      <div class="gros" id="scoreFinal">0</div>
+      <p id="message">viennoiseries attrapées !</p>
+      <p>Vous gagnez <b id="lot">un cadeau</b>. Laissez votre e-mail pour recevoir votre bon :</p>
+      <form id="formulaire" novalidate>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <input type="email" id="email" placeholder="votre@email.fr" autocomplete="email" required>
+          <label class="consent"><input type="checkbox" id="accord"><span>J'accepte de recevoir les offres de <span id="nomConsent">la boutique</span> (désinscription en un clic).</span></label>
+          <span class="erreur" id="erreur" hidden></span>
+          <button type="submit">Recevoir mon bon</button>
+        </div>
+      </form>
+      <button class="secondaire" id="rejouer">Rejouer</button>
+    </div>
+  </div>
+
+  <div class="ecran" id="gagne" hidden>
+    <div class="carte">
+      <div class="enseigne" id="nomBon">La Boulangerie du Coin</div>
+      <h1>Votre bon</h1>
+      <div class="bon"><p id="lotBon">-10 % sur votre prochaine visite</p><div class="code" id="code">PF-0000</div></div>
+      <p>Montrez cet écran en caisse. Un e-mail de confirmation vous est aussi envoyé.</p>
+      <p class="petit">Démo : aucun e-mail n'est réellement envoyé ni enregistré.</p>
+      <button class="secondaire" id="rejouer2">Rejouer</button>
+    </div>
+  </div>
+
+  <div class="signature">Démo <b>Playfunnel</b> · votre jeu, à vos couleurs</div>
+</div>
+
+<script>
+(function () {
+  // ── personnalisation par l'URL (la démo envoyée à chaque prospect porte SON nom)
+  const q = new URLSearchParams(location.search);
+  const nom = (q.get('nom') || 'La Boulangerie du Coin').slice(0, 40);
+  const couleur = /^#[0-9a-fA-F]{6}$/.test(q.get('couleur') || '') ? q.get('couleur') : null;
+  const offre = (q.get('offre') || '').slice(0, 60);
+  if (couleur) document.documentElement.style.setProperty('--marque', couleur);
+  for (const id of ['nomCommerce', 'nomBon']) document.getElementById(id).textContent = nom;
+  document.getElementById('nomConsent').textContent = nom;
+  if (offre) document.getElementById('offreAccueil').textContent = offre;
+
+  const cv = document.getElementById('jeu'), cx = cv.getContext('2d');
+  cx.imageSmoothingEnabled = false;
+  const W = 224, H = 400;
+  const img = n => { const i = new Image(); i.src = 'img/' + n + '.png'; return i; };
+  const fond = img('fond'), panier = img('panier');
+  const bons = ['croissant', 'pain_choc', 'chouquettes', 'eclair', 'canele', 'macaron_rose', 'macaron_jaune', 'religieuse', 'tarte_fraises', 'chou_creme', 'baguette'].map(img);
+
+  // ── sons (synthèse, rien à charger)
+  let ac = null;
+  function bip(f, d, type, vol) {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'square'; o.frequency.value = f; g.gain.value = vol || 0.06;
+      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + d);
+      o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + d);
+    } catch (e) {}
+  }
+
+  // ── état
+  const DUREE = 20;
+  let etat = 'accueil', t0 = 0, score = 0, objets = [], pops = [], px = W / 2, prochain = 0, dernier = 0;
+  const hud = document.getElementById('hud'), elScore = document.getElementById('score'), elTemps = document.getElementById('temps');
+
+  function montre(id) { for (const e of ['accueil', 'fin', 'gagne']) document.getElementById(e).hidden = e !== id; }
+
+  function demarrer() {
+    etat = 'jeu'; score = 0; objets = []; pops = []; px = W / 2; t0 = performance.now(); prochain = 0;
+    montre(null); hud.hidden = false; bip(660, .12); setTimeout(() => bip(990, .15), 110);
+  }
+
+  function finir() {
+    etat = 'fin'; hud.hidden = true;
+    const lot = offre || (score >= 18 ? '-10 % sur votre prochaine visite' : score >= 10 ? 'un café offert' : 'une chouquette offerte');
+    document.getElementById('scoreFinal').textContent = score;
+    document.getElementById('message').textContent = score >= 18 ? 'Score de chef pâtissier !' : score >= 10 ? 'Joli panier !' : 'Bien essayé !';
+    document.getElementById('lot').textContent = lot;
+    document.getElementById('lotBon').textContent = lot.charAt(0).toUpperCase() + lot.slice(1);
+    montre('fin'); bip(523, .15); setTimeout(() => bip(784, .25), 140);
+  }
+
+  // ── contrôle : le panier suit le doigt (ou la souris, ou les flèches)
+  function viser(ev) {
+    const r = cv.getBoundingClientRect();
+    const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    px = Math.max(26, Math.min(W - 26, x / r.width * W));
+  }
+  cv.addEventListener('pointerdown', viser); cv.addEventListener('pointermove', viser);
+  cv.addEventListener('touchmove', e => { viser(e); e.preventDefault(); }, { passive: false });
+  const touches = {};
+  addEventListener('keydown', e => touches[e.key] = true); addEventListener('keyup', e => touches[e.key] = false);
+
+  // ── boucle
+  function boucle(t) {
+    const dt = Math.min(0.05, (t - (dernier || t)) / 1000); dernier = t;
+    cx.drawImage(fond, 0, 0, W, H);
+    if (etat === 'jeu') {
+      const ecoule = (t - t0) / 1000, reste = Math.max(0, DUREE - ecoule);
+      if (touches.ArrowLeft) px = Math.max(26, px - 180 * dt);
+      if (touches.ArrowRight) px = Math.min(W - 26, px + 180 * dt);
+      // apparition : de plus en plus vite
+      if (t >= prochain) {
+        const k = Math.random() * bons.length | 0;
+        objets.push({ x: 18 + Math.random() * (W - 36), y: -20, v: 70 + ecoule * 6 + Math.random() * 30, r: (Math.random() - .5) * 3, a: 0, s: bons[k], dore: Math.random() < 0.12 });
+        prochain = t + Math.max(260, 620 - ecoule * 22);
+      }
+      const py = H - 52;
+      for (let i = objets.length - 1; i >= 0; i--) {
+        const o = objets[i];
+        o.y += o.v * dt; o.a += o.r * dt;
+        if (o.y > py - 10 && o.y < py + 14 && Math.abs(o.x - px) < 30) {
+          const pts = o.dore ? 3 : 1; score += pts; elScore.textContent = score;
+          pops.push({ x: o.x, y: py - 18, t: 0, txt: '+' + pts, dore: o.dore }); bip(o.dore ? 1320 : 880 + Math.random() * 120, .08);
+          objets.splice(i, 1); continue;
+        }
+        if (o.y > H + 20) { objets.splice(i, 1); continue; }
+        cx.save(); cx.translate(o.x, o.y); cx.rotate(o.a);
+        cx.shadowColor = o.dore ? '#ffd75a' : 'rgba(255,244,226,.9)'; cx.shadowBlur = o.dore ? 12 : 5;   // un halo : la viennoiserie se détache du décor chargé
+        cx.drawImage(o.s, -18, -18, 36, 36); cx.restore();
+      }
+      cx.drawImage(panier, px - 28, py - 16, 56, 42);
+      for (let i = pops.length - 1; i >= 0; i--) {
+        const p = pops[i]; p.t += dt; if (p.t > .6) { pops.splice(i, 1); continue; }
+        cx.globalAlpha = 1 - p.t / .6; cx.fillStyle = p.dore ? '#ffd75a' : '#fff'; cx.font = 'bold 12px Silkscreen, monospace'; cx.textAlign = 'center';
+        cx.fillText(p.txt, p.x, p.y - p.t * 30); cx.globalAlpha = 1;
+      }
+      elTemps.textContent = Math.ceil(reste);
+      if (reste <= 0) finir();
+    }
+    requestAnimationFrame(boucle);
+  }
+  requestAnimationFrame(boucle);
+
+  document.getElementById('jouer').onclick = demarrer;
+  document.getElementById('rejouer').onclick = demarrer;
+  document.getElementById('rejouer2').onclick = demarrer;
+  document.getElementById('formulaire').addEventListener('submit', e => {
+    e.preventDefault();
+    const em = document.getElementById('email').value.trim(), err = document.getElementById('erreur');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { err.textContent = 'Entrez un e-mail valide.'; err.hidden = false; return; }
+    if (!document.getElementById('accord').checked) { err.textContent = 'Cochez la case pour recevoir votre bon.'; err.hidden = false; return; }
+    err.hidden = true;
+    document.getElementById('code').textContent = 'PF-' + String(Math.floor(1000 + Math.random() * 9000));
+    montre('gagne'); bip(784, .12); setTimeout(() => bip(1047, .2), 120);
+  });
+})();
+</script>
+</body>
+</html>
