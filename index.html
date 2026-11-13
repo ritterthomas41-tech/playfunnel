@@ -85,6 +85,17 @@ h2 { font-family: var(--titre); font-weight: 800; font-size: clamp(30px, 3.6vw, 
 .puces { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 0; }
 .puces li { border: 1.5px solid var(--encre); border-radius: 999px; padding: 8px 16px; font-size: 15px; background: var(--surface); }
 
+.qui { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 48px; align-items: start; }
+.qui p { color: var(--doux); font-size: 17px; margin: 0 0 14px; max-width: 62ch; }
+.qui p b { color: var(--encre); }
+.atouts { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.atouts li { background: var(--surface); border: 1px solid var(--ligne); border-radius: 14px; padding: 18px 20px; }
+.atouts b { display: block; font-family: var(--titre); font-size: 19px; margin-bottom: 4px; }
+.atouts span { color: var(--doux); font-size: 15px; }
+.probleme { background: var(--surface); border: 2px solid var(--encre); border-radius: 16px; padding: 32px 28px; box-shadow: 8px 8px 0 var(--encre); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; }
+.probleme h2 { margin-bottom: 10px; }
+.probleme ul { margin: 14px 0 0; padding-left: 20px; color: var(--doux); font-size: 16px; }
+.probleme li { margin: 4px 0; }
 .contact .contenu { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center; }
 .mail { font-family: var(--titre); font-weight: 700; font-size: clamp(22px, 3vw, 32px); overflow-wrap: anywhere; user-select: all; }
 .copie { margin-top: 12px; }
@@ -95,7 +106,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   nav a:not(.btn) { display: none; }
   .hero { padding-block: 40px 56px; }
   .hero .contenu, .tarif, .contact .contenu { grid-template-columns: minmax(0, 1fr); gap: 40px; }
-  .etapes, .gains { grid-template-columns: minmax(0, 1fr); }
+  .etapes, .gains, .qui, .probleme { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
 </style>
@@ -109,6 +120,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <a href="#fonctionnement">Comment ça marche</a>
       <a href="#tarif">Tarif</a>
       <a href="#aussi">Autres projets</a>
+      <a href="#qui">Qui sommes-nous</a>
       <a class="btn clair" href="#contact" style="padding:9px 16px;font-size:15px;box-shadow:0 3px 0 var(--encre)">Nous écrire</a>
     </nav>
   </div>
@@ -202,6 +214,42 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         <li>Outils internes ludiques</li>
         <li>Applications et vrais jeux vidéo</li>
       </ul>
+    </div>
+  </section>
+
+  <section class="bande" id="qui">
+    <div class="contenu qui">
+      <div>
+        <h2>Qui sommes-nous ?</h2>
+        <p>Playfunnel est né chez <b>Game &amp; Disc</b>, une boutique de jeux vidéo indépendante du Loir-et-Cher. Depuis des années, on vit au milieu des jeux : on les achète, on les teste, on les conseille, et on voit chaque jour ce qui fait qu'un joueur accroche… ou décroche au bout de dix secondes.</p>
+        <p>On ne s'est pas arrêtés là : on <b>développe aussi nos propres jeux</b>, dont <b>FRENCH DREAM</b>, annoncé sur Steam. Conception, graphismes, sons, réglage de la difficulté : on fait tout nous-mêmes.</p>
+        <p>Aujourd'hui, on met ce savoir-faire au service des <b>commerces, des lieux de visite et des marques</b>. Pas de modèle de roue de la fortune recopié à l'infini : un vrai petit jeu, pensé pour votre activité et vos clients, par des gens dont c'est le métier.</p>
+      </div>
+      <ul class="atouts">
+        <li><b>Des joueurs avant tout</b><span>On sait ce qui donne envie de rejouer, et ce qui fait fuir.</span></li>
+        <li><b>Un vrai studio de jeu vidéo</b><span>Les mêmes outils et la même exigence que pour nos jeux sur PC.</span></li>
+        <li><b>Un commerce, comme vous</b><span>On connaît la vitrine, la caisse et les clients qu'on aimerait voir revenir.</span></li>
+        <li><b>Un interlocuteur unique</b><span>Vous parlez directement à la personne qui crée votre jeu.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bande" id="idee">
+    <div class="contenu">
+      <div class="probleme">
+        <div>
+          <h2>Pas d'idée de jeu ? Pas grave.</h2>
+          <p class="intro" style="margin-bottom:0">Vous n'avez pas besoin d'arriver avec un concept. Un problème suffit. Par exemple :</p>
+          <ul>
+            <li>«&nbsp;Mes clients ne laissent jamais leur e-mail.&nbsp;»</li>
+            <li>«&nbsp;Ma nouveauté ne se vend pas.&nbsp;»</li>
+            <li>«&nbsp;Les familles passent devant sans entrer.&nbsp;»</li>
+            <li>«&nbsp;Je n'arrive pas à recruter.&nbsp;»</li>
+          </ul>
+          <p style="margin:16px 0 0;color:var(--doux)">Racontez-le-nous : on en discute, sans engagement, et on vous propose une idée de jeu adaptée.</p>
+        </div>
+        <a class="btn" href="#contact">En discuter avec nous</a>
+      </div>
     </div>
   </section>
 
