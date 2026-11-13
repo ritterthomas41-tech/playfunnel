@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pluie de viennoiseries — démo Playfunnel</title>
+<meta name="description" content="Démo Playfunnel : un mini-jeu en réalité augmentée, à vos couleurs, joué en scannant un QR code.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Work+Sans:wght@400;600;700&display=swap">
+<style>
+/* Démo Playfunnel en RÉALITÉ AUGMENTÉE « légère » : la caméra filme la pièce du joueur, le gyroscope
+   ancre les viennoiseries dans l'espace (on tourne le téléphone pour les trouver), on les attrape au doigt.
+   Sans caméra ni gyroscope (ordinateur, refus) : décor dessiné, on regarde autour en glissant.
+   Personnalisable par l'URL : ?nom=Boulangerie%20Martin&couleur=%23c0392b&offre=-10%25%20sur%20votre%20visite */
+:root { --marque: #e0662a; --verre: rgba(18, 12, 8, .52); --bord: rgba(255, 255, 255, .16); }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: #0e0a07; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+body { font-family: "Work Sans", system-ui, sans-serif; color: #fff; }
+#cam { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#decor { position: fixed; inset: -12%; background: url(../demo/img/fond.png) center / cover; image-rendering: pixelated; filter: blur(3px) brightness(.72) saturate(1.1); transition: transform .08s linear; }
+#jeu { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#flash { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s; }
+
+/* HUD */
+#hud { position: fixed; top: 0; left: 0; right: 0; padding: calc(10px + env(safe-area-inset-top)) 16px 0; pointer-events: none; }
+#barre { height: 7px; border-radius: 99px; background: rgba(255,255,255,.22); overflow: hidden; }
+#barre i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ffd166, var(--marque)); border-radius: 99px; }
+#ligne { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; }
+.compteur { background: var(--verre); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--bord); border-radius: 16px; padding: 6px 14px; text-align: center; min-width: 74px; }
+.compteur b { display: block; font: 900 30px/1 "Archivo", sans-serif; }
+.compteur span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+#combo { font: 900 26px "Archivo", sans-serif; color: #ffd166; text-shadow: 0 2px 12px rgba(0,0,0,.6); opacity: 0; transform: scale(.6); transition: transform .15s, opacity .15s; align-self: center; }
+#combo.on { opacity: 1; transform: scale(1); }
+#decompte { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
+#decompte b { font: 900 120px/1 "Archivo", sans-serif; }
+#decompte span { font: 700 20px "Work Sans", sans-serif; margin-top: 8px; }
+#aide { position: fixed; left: 0; right: 0; bottom: calc(18px + env(safe-area-inset-bottom)); text-align: center; font-size: 13px; opacity: .8; pointer-events: none; text-shadow: 0 1px 6px #000; }
+
+/* écrans */
+.ecran { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 22px; background: radial-gradient(ellipse at center, rgba(0,0,0,.25), rgba(0,0,0,.65)); }
+.carte { width: 100%; max-width: 360px; background: var(--verre); -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); border: 1px solid var(--bord); border-radius: 26px; padding: 26px 22px; display: flex; flex-direction: column; gap: 14px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.45); animation: entre .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes entre { from { transform: translateY(24px) scale(.94); opacity: 0; } }
+.enseigne { display: inline-block; align-self: center; font: 700 12px "Work Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px; border-radius: 99px; background: color-mix(in srgb, var(--marque) 30%, transparent); border: 1px solid color-mix(in srgb, var(--marque) 70%, white 10%); }
+h1 { font: 900 clamp(28px, 8.5vw, 38px)/1.02 "Archivo", sans-serif; margin: 0; letter-spacing: -.01em; }
+h1 em { font-style: normal; color: #ffd166; }
+p { margin: 0; line-height: 1.45; font-size: 15px; color: rgba(255,255,255,.88); }
+.badges { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }
+.badges span { background: rgba(255,255,255,.1); border: 1px solid var(--bord); border-radius: 99px; padding: 5px 10px; }
+button { font: 800 18px "Archivo", sans-serif; letter-spacing: .02em; color: #fff; border: 0; border-radius: 99px; padding: 17px 22px; cursor: pointer; background: linear-gradient(180deg, color-mix(in srgb, var(--marque) 80%, white 20%), var(--marque)); box-shadow: 0 10px 30px color-mix(in srgb, var(--marque) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.35); transition: transform .1s; }
+button:active { transform: scale(.97); }
+button.secondaire { background: transparent; box-shadow: none; border: 1px solid var(--bord); font: 600 15px "Work Sans", sans-serif; padding: 12px; }
+.gros { font: 900 76px/1 "Archivo", sans-serif; background: linear-gradient(180deg, #fff, #ffd166); -webkit-background-clip: text; background-clip: text; color: transparent; }
+input[type=email] { font: 16px "Work Sans", sans-serif; padding: 14px 16px; border: 1px solid var(--bord); border-radius: 14px; width: 100%; background: rgba(255,255,255,.95); color: #1b120b; }
+label.consent { display: flex; gap: 9px; align-items: flex-start; text-align: left; font-size: 12.5px; line-height: 1.35; color: rgba(255,255,255,.85); }
+label.consent input { margin-top: 1px; width: 18px; height: 18px; flex: none; accent-color: var(--marque); }
+.bon { border: 2px dashed #ffd166; border-radius: 18px; padding: 16px; background: rgba(255,209,102,.08); }
+.bon .code { font: 900 30px "Archivo", sans-serif; letter-spacing: .1em; color: #ffd166; margin-top: 6px; }
+.petit { font-size: 12px; opacity: .7; }
+.erreur { color: #ff8a80; font-size: 13px; }
+#qrBloc { display: flex; gap: 14px; align-items: center; text-align: left; background: rgba(255,255,255,.08); border: 1px solid var(--bord); border-radius: 18px; padding: 12px; }
+#qr { background: #fff; padding: 6px; border-radius: 10px; flex: none; line-height: 0; }
+#qrBloc p { font-size: 13px; }
+.signature { position: fixed; left: 0; right: 0; bottom: calc(6px + env(safe-area-inset-bottom)); font-size: 11px; text-align: center; opacity: .6; pointer-events: none; }
+</style>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay hidden></video>
+<div id="decor"></div>
+<canvas id="jeu" aria-label="Jeu : attrapez les viennoiseries qui tombent autour de vous"></canvas>
+<div id="flash"></div>
+
+<div id="hud" hidden>
+  <div id="barre"><i id="barreIn"></i></div>
+  <div id="ligne">
+    <div class="compteur"><b id="score">0</b><span>points</span></div>
+    <div id="combo">x2</div>
+    <div class="compteur"><b id="temps">25</b><span>sec.</span></div>
+  </div>
+</div>
+<div id="decompte" hidden><b id="chiffre">3</b><span id="consigne">Regarde autour de toi !</span></div>
+<div id="aide" hidden>Tourne-toi pour les trouver · touche-les pour les attraper · évite les brûlées</div>
+
+<div class="ecran" id="accueil">
+  <div class="carte">
+    <div class="enseigne" id="nomCommerce">La Boulangerie du Coin</div>
+    <h1>La pluie de <em>viennoiseries</em></h1>
+    <p>Elles tombent <b>tout autour de toi</b>. Attrape-en un max en <b>25 secondes</b> et gagne <b id="offreAccueil">une récompense</b>.</p>
+    <div class="badges"><span>📷 Réalité augmentée</span><span>✨ Dorées = x3</span><span>🔥 Brûlées = -2</span></div>
+    <button id="jouer">Jouer</button>
+    <div id="qrBloc" hidden><div id="qr"></div><p><b>Encore mieux sur téléphone :</b> scanne ce code, le jeu apparaît dans ta pièce.</p></div>
+    <p class="petit" id="noteAcces">Le jeu utilise ta caméra et le mouvement du téléphone. Rien n'est enregistré.</p>
+  </div>
+</div>
+
+<div class="ecran" id="fin" hidden>
+  <div class="carte">
+    <div class="enseigne">Partie terminée</div>
+    <div class="gros" id="scoreFinal">0</div>
+    <p id="message">points !</p>
+    <p>Tu gagnes <b id="lot">un cadeau</b>. Laisse ton e-mail pour recevoir ton bon :</p>
+    <form id="formulaire" novalidate>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input type="email" id="email" placeholder="ton@email.fr" autocomplete="email" required>
+        <label class="consent"><input type="checkbox" id="accord"><span>J'accepte de recevoir les offres de <span id="nomConsent">la boutique</span> (désinscription en un clic).</span></label>
+        <span class="erreur" id="erreur" hidden></span>
+        <button type="submit">Recevoir mon bon</button>
+      </div>
+    </form>
+    <button class="secondaire" id="rejouer">Rejouer</button>
+  </div>
+</div>
+
+<div class="ecran" id="gagne" hidden>
+  <div class="carte">
+    <div class="enseigne" id="nomBon">La Boulangerie du Coin</div>
+    <h1>Ton bon</h1>
+    <div class="bon"><p id="lotBon">-10 % sur ta prochaine visite</p><div class="code" id="code">PF-0000</div></div>
+    <p>Montre cet écran en caisse. Un e-mail de confirmation t'est aussi envoyé.</p>
+    <p class="petit">Démo : aucun e-mail n'est réellement envoyé ni enregistré.</p>
+    <button class="secondaire" id="rejouer2">Rejouer</button>
+  </div>
+</div>
+
+<div class="signature">Démo <b>Playfunnel</b> · ton jeu, à tes couleurs</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  // ── personnalisation par l'URL
+  const q = new URLSearchParams(location.search);
+  const nom = (q.get('nom') || 'La Boulangerie du Coin').slice(0, 40);
+  const couleur = /^#[0-9a-fA-F]{6}$/.test(q.get('couleur') || '') ? q.get('couleur') : null;
+  const offre = (q.get('offre') || '').slice(0, 60);
+  if (couleur) document.documentElement.style.setProperty('--marque', couleur);
+  const MARQUE = couleur || '#e0662a';
+  for (const id of ['nomCommerce', 'nomBon', 'nomConsent']) document.getElementById(id).textContent = nom;
+  if (offre) document.getElementById('offreAccueil').textContent = offre;
+  const $ = id => document.getElementById(id);
+
+  // sur ordinateur : le QR code pour jouer sur téléphone (le vrai effet)
+  const tactile = matchMedia('(pointer: coarse)').matches;
+  if (!tactile) {
+    $('qrBloc').hidden = false;
+    $('noteAcces').textContent = 'Sur ordinateur : glisse la souris pour regarder autour de toi.';
+    try { new QRCode($('qr'), { text: location.href, width: 96, height: 96, correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $('qrBloc').hidden = true; }
+  }
+
+  // ── canvas plein écran
+  const cv = $('jeu'), cx = cv.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  function taille() { DPR = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  addEventListener('resize', taille); taille();
+
+  // ── images (sprites pixel art) + leur version « brûlée », pré-calculée (pas de ctx.filter sur Safari)
+  const charge = n => { const i = new Image(); i.src = '../demo/img/' + n + '.png'; return i; };
+  const NOMS = ['croissant', 'pain_choc', 'chouquettes', 'eclair', 'canele', 'macaron_rose', 'macaron_jaune', 'religieuse', 'tarte_fraises', 'chou_creme'];
+  const sprites = NOMS.map(charge);
+  const brule = charge('croissant');
+  let bruleCv = null;
+  brule.onload = () => {
+    const c = document.createElement('canvas'); c.width = brule.width; c.height = brule.height;
+    const g = c.getContext('2d'); g.drawImage(brule, 0, 0);
+    g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(25,12,4,.78)'; g.fillRect(0, 0, c.width, c.height);
+    bruleCv = c;
+  };
+
+  // ── sons (synthèse WebAudio, rien à charger)
+  let ac = null;
+  function audio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; }
+  function note(f, d, type, vol, quand) {
+    const a = audio(); if (!a) return;
+    const t = a.currentTime + (quand || 0), o = a.createOscillator(), g = a.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(vol || .12, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .02);
+  }
+  function croc(vol) {   // le « croc » : un bruit filtré très court
+    const a = audio(); if (!a) return;
+    const n = a.sampleRate * .07, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = .8; g.gain.value = vol || .5;
+    s.buffer = b; s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+  }
+  const vibre = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+  // ── orientation : matrice de rotation W3C (alpha, beta, gamma) -> axes du téléphone dans le monde
+  const DEG = Math.PI / 180;
+  let R = null, dernierGyro = 0;
+  function surOrientation(e) {
+    if (e.alpha == null && e.beta == null) return;
+    const a = (e.alpha || 0) * DEG, b = (e.beta || 0) * DEG, g = (e.gamma || 0) * DEG;
+    const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
+    R = [cA * cG - sA * sB * sG, -cB * sA, cG * sA * sB + cA * sG,
+         cG * sA + cA * sB * sG,  cA * cB, sA * sG - cA * cG * sB,
+         -cB * sG,                sB,      cB * cG];
+    dernierGyro = performance.now();
+  }
+  addEventListener('deviceorientation', surOrientation);
+
+  // regard « virtuel » quand il n'y a pas de gyroscope : on tourne en glissant
+  let lacet = 0, tangage = .12, glisse = null;
+  function base() {
+    // renvoie {droite, haut, avant} en coordonnées monde (x est, y nord, z haut)
+    if (R && performance.now() - dernierGyro < 1500) {
+      const c0 = [R[0], R[3], R[6]], c1 = [R[1], R[4], R[7]], c2 = [R[2], R[5], R[8]];
+      const ang = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * DEG;
+      const co = Math.cos(ang), si = Math.sin(ang);
+      return { droite: [co * c0[0] - si * c1[0], co * c0[1] - si * c1[1], co * c0[2] - si * c1[2]],
+               haut: [si * c0[0] + co * c1[0], si * c0[1] + co * c1[1], si * c0[2] + co * c1[2]],
+               avant: [-c2[0], -c2[1], -c2[2]], gyro: true };
+    }
+    const cy = Math.cos(lacet), sy = Math.sin(lacet), cp = Math.cos(tangage), sp = Math.sin(tangage);
+    const avant = [sy * cp, cy * cp, sp], droite = [cy, -sy, 0];
+    const haut = [droite[1] * avant[2] - droite[2] * avant[1], droite[2] * avant[0] - droite[0] * avant[2], droite[0] * avant[1] - droite[1] * avant[0]];
+    return { droite, haut, avant, gyro: false };
+  }
+  const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+
+  // ── caméra
+  async function ouvrirCamera() {
+    try {
+      const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+      const v = $('cam'); v.srcObject = flux; await v.play().catch(() => {});
+      v.hidden = false; $('decor').hidden = true; return true;
+    } catch (e) { return false; }
+  }
+  async function demanderMouvement() {
+    try {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')
+        await DeviceOrientationEvent.requestPermission();
+    } catch (e) {}
+  }
+
+  // ── état du jeu
+  const DUREE = 25;
+  let etat = 'accueil', t0 = 0, score = 0, combo = 0, dernierCroc = 0, objets = [], parts = [], pops = [], ondes = [], prochain = 0, dernier = 0, finDecompte = 0, camOk = false;
+
+  function montre(id) { for (const e of ['accueil', 'fin', 'gagne']) $(e).hidden = e !== id; }
+
+  async function lancer() {
+    audio(); note(660, .12, 'triangle', .1);
+    $('jouer').disabled = true; $('jouer').textContent = 'Ouverture…';
+    await demanderMouvement();
+    if (tactile && !camOk) camOk = await ouvrirCamera();
+    $('jouer').disabled = false; $('jouer').textContent = 'Jouer';
+    montre(null); $('decompte').hidden = false; $('aide').hidden = false;
+    etat = 'decompte'; finDecompte = performance.now() + 3000; objets = []; parts = []; pops = []; ondes = [];
+  }
+
+  function demarrer(t) {
+    etat = 'jeu'; t0 = t; score = 0; combo = 0; prochain = t + 300;
+    $('decompte').hidden = true; $('hud').hidden = false; $('score').textContent = '0';
+    note(784, .15, 'triangle', .12); note(1175, .25, 'triangle', .12, .12);
+    // une première salve bien en face, pour comprendre tout de suite
+    for (let i = 0; i < 3; i++) apparait(t, (i - 1) * .32, false);
+  }
+
+  function finir() {
+    etat = 'fin'; $('hud').hidden = true; $('aide').hidden = true; objets = [];
+    const lot = offre || (score >= 30 ? '-10 % sur ta prochaine visite' : score >= 15 ? 'un café offert' : 'une chouquette offerte');
+    $('scoreFinal').textContent = score;
+    $('message').textContent = score >= 30 ? 'Score de chef pâtissier !' : score >= 15 ? 'Joli panier !' : 'Bien essayé !';
+    $('lot').textContent = lot; $('lotBon').textContent = lot.charAt(0).toUpperCase() + lot.slice(1);
+    montre('fin'); [523, 659, 784, 1047].forEach((f, i) => note(f, .3, 'triangle', .12, i * .1)); vibre([30, 40, 60]);
+  }
+
+  // une viennoiserie apparaît devant le joueur (décalée en lacet), en hauteur, et tombe vers lui
+  function apparait(t, decal, auHasard) {
+    const b = base();
+    let fx = b.avant[0], fy = b.avant[1]; const n = Math.hypot(fx, fy) || 1; fx /= n; fy /= n;
+    // une sur deux apparaît dans le champ, l'autre un peu à côté : on tourne la tête sans se perdre
+    const ang = decal != null ? decal : (Math.random() < .5 ? (Math.random() - .5) * .45 : (Math.random() < .5 ? -1 : 1) * (.3 + Math.random() * .4));
+    const c = Math.cos(ang), s = Math.sin(ang);
+    const dx = fx * c - fy * s, dy = fx * s + fy * c, dist = 3.2 + Math.random() * 1.4;
+    const r = Math.random(), type = auHasard === false ? 'bon' : (r < .12 ? 'or' : r < .22 ? 'brule' : 'bon');
+    objets.push({ p: [dx * dist, dy * dist, .9 + Math.random() * 1.1], v: [-dx * (.25 + Math.random() * .2), -dy * (.25 + Math.random() * .2), -(.45 + Math.random() * .35)],
+                  rot: Math.random() * 6, vr: (Math.random() - .5) * 3, s: sprites[Math.random() * sprites.length | 0], type, ne: t });
+  }
+
+  // projection monde -> écran
+  function projette(p, b) {
+    const z = dot(p, b.avant); if (z < .25) return null;
+    const f = Math.max(W, H) / (2 * Math.tan(31 * DEG));
+    return { x: W / 2 + dot(p, b.droite) / z * f, y: H / 2 - dot(p, b.haut) / z * f, z, k: f / z };
+  }
+
+  // ── toucher : attraper
+  function attrape(ev) {
+    if (etat !== 'jeu') return;
+    const x = ev.clientX, y = ev.clientY, b = base();
+    let meilleur = null, md = 1e9;
+    for (const o of objets) { const e = projette(o.p, b); if (!e) continue; const r = .2 * e.k * 1.35 + 18, d = Math.hypot(e.x - x, e.y - y); if (d < r && d < md) { md = d; meilleur = { o, e }; } }
+    if (!meilleur) return;
+    const { o, e } = meilleur; objets.splice(objets.indexOf(o), 1);
+    const t = performance.now();
+    if (o.type === 'brule') {
+      score = Math.max(0, score - 2); combo = 0; majCombo();
+      pops.push({ x: e.x, y: e.y, t: 0, txt: '-2', c: '#ff6b5b' }); eclat(e.x, e.y, ['#3a2214', '#1c0f07', '#6b4a33'], 14);
+      flash('rgba(255,60,40,.28)'); note(150, .22, 'sawtooth', .1); vibre(80);
+    } else {
+      combo = t - dernierCroc < 1600 ? combo + 1 : 1; dernierCroc = t; majCombo();
+      const pts = (o.type === 'or' ? 3 : 1) + (combo >= 3 ? 1 : 0);
+      score += pts; $('score').textContent = score;
+      pops.push({ x: e.x, y: e.y, t: 0, txt: '+' + pts, c: o.type === 'or' ? '#ffd166' : '#fff' });
+      eclat(e.x, e.y, o.type === 'or' ? ['#ffd166', '#fff3c4', '#ffb300'] : ['#f3c27a', '#d98f3f', '#fff1d6', MARQUE], o.type === 'or' ? 26 : 16);
+      ondes.push({ x: e.x, y: e.y, t: 0, c: o.type === 'or' ? '#ffd166' : '#fff' });
+      croc(.45); note(660 * Math.pow(1.06, Math.min(combo, 10)), .12, 'triangle', .09);
+      if (o.type === 'or') { [1047, 1319, 1568].forEach((f, i) => note(f, .18, 'sine', .08, i * .06)); flash('rgba(255,209,102,.22)'); }
+      vibre(o.type === 'or' ? 35 : 15);
+    }
+  }
+  cv.addEventListener('pointerdown', ev => { attrape(ev); glisse = { x: ev.clientX, y: ev.clientY, l: lacet, t: tangage }; });
+  addEventListener('pointermove', ev => {
+    if (!glisse || (R && performance.now() - dernierGyro < 1500)) return;
+    lacet = glisse.l - (ev.clientX - glisse.x) * .006;
+    tangage = Math.max(-.5, Math.min(.8, glisse.t + (ev.clientY - glisse.y) * .006));
+  });
+  addEventListener('pointerup', () => glisse = null);
+
+  function majCombo() { const c = $('combo'); if (combo >= 2) { c.textContent = 'x' + combo + ' COMBO'; c.classList.add('on'); } else c.classList.remove('on'); }
+  function flash(c) { const f = $('flash'); f.style.background = c; f.style.transition = 'none'; f.style.opacity = 1; requestAnimationFrame(() => { f.style.transition = 'opacity .3s'; f.style.opacity = 0; }); }
+  function eclat(x, y, cols, n) {
+    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 260;
+      parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, t: 0, vie: .5 + Math.random() * .4, c: cols[i % cols.length], s: 3 + Math.random() * 5 }); }
+  }
+
+  // flèche au bord de l'écran vers une viennoiserie dorée hors champ
+  function fleche(p, b) {
+    const x = dot(p, b.droite), y = dot(p, b.haut); const a = Math.atan2(-y, x);
+    const m = 34, cxe = W / 2 + Math.cos(a) * (W / 2 - m), cye = H / 2 + Math.sin(a) * (H / 2 - m);
+    cx.save(); cx.translate(Math.max(m, Math.min(W - m, cxe)), Math.max(m + 70, Math.min(H - m, cye))); cx.rotate(a);
+    cx.fillStyle = '#ffd166'; cx.shadowColor = '#ffd166'; cx.shadowBlur = 14;
+    cx.beginPath(); cx.moveTo(16, 0); cx.lineTo(-8, -11); cx.lineTo(-3, 0); cx.lineTo(-8, 11); cx.closePath(); cx.fill(); cx.restore();
+  }
+
+  // ── boucle
+  function boucle(t) {
+    const dt = Math.min(.05, (t - (dernier || t)) / 1000); dernier = t;
+    cx.clearRect(0, 0, W, H);
+    const b = base();
+    if (!b.gyro && !$('decor').hidden) $('decor').style.transform = `translate(${(-lacet * 60) % 60}px, ${tangage * 40}px)`;
+
+    if (etat === 'decompte') {
+      const reste = Math.ceil((finDecompte - t) / 1000);
+      if ($('chiffre').textContent !== String(reste) && reste > 0) { $('chiffre').textContent = reste; note(523, .1, 'triangle', .1); }
+      if (t >= finDecompte) demarrer(t);
+    }
+
+    if (etat === 'jeu') {
+      const ecoule = (t - t0) / 1000, reste = Math.max(0, DUREE - ecoule);
+      if (t >= prochain && objets.length < 9) { apparait(t); prochain = t + Math.max(380, 950 - ecoule * 26); }
+      if (combo && t - dernierCroc > 1600) { combo = 0; majCombo(); }
+      // trier du plus loin au plus proche
+      const vus = [];
+      for (let i = objets.length - 1; i >= 0; i--) {
+        const o = objets[i];
+        o.p[0] += o.v[0] * dt; o.p[1] += o.v[1] * dt; o.p[2] += o.v[2] * dt; o.rot += o.vr * dt;
+        if (o.p[2] < -1.5 || Math.hypot(o.p[0], o.p[1]) < .6) {   // tombé par terre ou passé à côté
+          if (o.type !== 'brule') { combo = 0; majCombo(); }
+          objets.splice(i, 1); continue;
+        }
+        const e = projette(o.p, b);
+        if (!e) { if (o.type === 'or') fleche(o.p, b); continue; }
+        if ((e.x < -40 || e.x > W + 40 || e.y < -40 || e.y > H + 40) && o.type === 'or') fleche(o.p, b);
+        vus.push({ o, e });
+      }
+      vus.sort((a, c) => a.e.z < c.e.z ? 1 : -1);
+      cx.imageSmoothingEnabled = false;
+      for (const { o, e } of vus) {
+        const s = .4 * e.k, ent = Math.min(1, (t - o.ne) / 250);
+        cx.save(); cx.translate(e.x, e.y); cx.rotate(o.rot); cx.scale(ent, ent);
+        if (o.type === 'or') {   // halo doré qui pulse
+          const g = cx.createRadialGradient(0, 0, 0, 0, 0, s);
+          g.addColorStop(0, 'rgba(255,209,102,.55)'); g.addColorStop(1, 'rgba(255,209,102,0)');
+          cx.fillStyle = g; cx.beginPath(); cx.arc(0, 0, s * (1 + .12 * Math.sin(t / 120)), 0, Math.PI * 2); cx.fill();
+        } else if (o.type !== 'brule') {
+          cx.fillStyle = 'rgba(255,255,255,.18)'; cx.beginPath(); cx.arc(0, 0, s * .62, 0, Math.PI * 2); cx.fill();
+        }
+        const img = o.type === 'brule' ? (bruleCv || brule) : o.s;
+        cx.drawImage(img, -s / 2, -s / 2, s, s);
+        if (o.type === 'brule') { cx.globalAlpha = .7 + .3 * Math.sin(t / 90); cx.font = `${s * .4}px sans-serif`; cx.textAlign = 'center'; cx.fillText('🔥', s * .3, -s * .25); cx.globalAlpha = 1; }
+        cx.restore();
+      }
+      $('temps').textContent = Math.ceil(reste);
+      $('barreIn').style.width = (reste / DUREE * 100) + '%';
+      if (reste <= 5 && Math.ceil(reste) !== boucle.tic) { boucle.tic = Math.ceil(reste); if (reste > 0) note(1200, .05, 'square', .05); }
+      if (reste <= 0) finir();
+    }
+
+    // particules, ondes, textes
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i]; p.t += dt; if (p.t > p.vie) { parts.splice(i, 1); continue; }
+      p.vy += 700 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      cx.globalAlpha = 1 - p.t / p.vie; cx.fillStyle = p.c; cx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+    }
+    for (let i = ondes.length - 1; i >= 0; i--) {
+      const o = ondes[i]; o.t += dt; if (o.t > .4) { ondes.splice(i, 1); continue; }
+      cx.globalAlpha = 1 - o.t / .4; cx.strokeStyle = o.c; cx.lineWidth = 4; cx.beginPath(); cx.arc(o.x, o.y, 20 + o.t * 180, 0, Math.PI * 2); cx.stroke();
+    }
+    for (let i = pops.length - 1; i >= 0; i--) {
+      const p = pops[i]; p.t += dt; if (p.t > .8) { pops.splice(i, 1); continue; }
+      const k = p.t < .12 ? p.t / .12 * 1.3 : 1.3 - Math.min(.3, (p.t - .12) * 2);
+      cx.globalAlpha = 1 - Math.max(0, p.t - .4) / .4; cx.fillStyle = p.c; cx.font = `900 ${34 * k}px Archivo, sans-serif`; cx.textAlign = 'center';
+      cx.shadowColor = 'rgba(0,0,0,.6)'; cx.shadowBlur = 8; cx.fillText(p.txt, p.x, p.y - 30 - p.t * 60); cx.shadowBlur = 0;
+    }
+    cx.globalAlpha = 1;
+    requestAnimationFrame(boucle);
+  }
+  requestAnimationFrame(boucle);
+
+  $('jouer').onclick = lancer;
+  $('rejouer').onclick = lancer;
+  $('rejouer2').onclick = lancer;
+  $('formulaire').addEventListener('submit', e => {
+    e.preventDefault();
+    const em = $('email').value.trim(), err = $('erreur');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { err.textContent = 'Entre un e-mail valide.'; err.hidden = false; return; }
+    if (!$('accord').checked) { err.textContent = 'Coche la case pour recevoir ton bon.'; err.hidden = false; return; }
+    err.hidden = true;
+    $('code').textContent = 'PF-' + String(Math.floor(1000 + Math.random() * 9000));
+    montre('gagne'); note(784, .12, 'triangle', .1); note(1047, .2, 'triangle', .1, .12);
+  });
+
+  // banc (BOS) : ?banc=1 expose l'état pour les tests
+  if (q.get('banc')) window.__pf = { get etat() { return etat; }, get score() { return score; }, get objets() { return objets; }, base, projette, surOrientation, apparait, attrape };
+})();
+</script>
+</body>
+</html>
