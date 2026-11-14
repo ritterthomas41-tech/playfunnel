@@ -56,9 +56,15 @@ h1 em { font-style: normal; color: var(--accent); }
 /* vidéo explicative : lecture auto sans le son ; le bouton « Nous contacter » se pose dans le bas libre de l'écran de fin */
 .film { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 3px solid var(--encre); border-radius: 18px; overflow: hidden; background: #15151d; box-shadow: 12px 12px 0 var(--accent); container-type: inline-size; }
 .film video { width: 100%; height: 100%; display: block; object-fit: cover; }
-.film .son, .film .revoir { position: absolute; top: 3%; right: 2%; font: 600 clamp(11px, 2cqw, 14px) var(--texte); padding: .55em 1em; border-radius: 999px; border: 0; background: rgba(0,0,0,.6); color: #fff; cursor: pointer; }
-.film .revoir { right: auto; left: 2%; }
-.film.finie .son, .film.finie .revoir { top: auto; bottom: 4%; }   /* écran de fin : le logo occupe le haut, le bas est libre */
+.film video { cursor: pointer; }
+.film .commandes, .film .revoir { position: absolute; top: 3%; right: 2%; font: 600 clamp(11px, 2cqw, 14px) var(--texte); border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; }
+.film .commandes { display: flex; align-items: center; gap: .3em; padding: .25em .7em .25em .3em; }
+.film .commandes button { font: inherit; font-size: 1.15em; line-height: 1; width: 2em; height: 2em; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+.film .commandes button:hover { background: rgba(255,255,255,.15); }
+.film .commandes input { width: clamp(50px, 14cqw, 110px); accent-color: var(--accent); cursor: pointer; }
+.film .revoir { right: auto; left: 2%; border: 0; padding: .55em 1em; cursor: pointer; }
+.film.finie .commandes, .film.finie .revoir { top: auto; bottom: 4%; }   /* écran de fin : le logo occupe le haut, le bas est libre */
+.film .grand-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(56px, 14cqw, 110px); aspect-ratio: 1; border-radius: 50%; border: 3px solid #fff; background: var(--accent); color: #fff; font-size: clamp(22px, 5.5cqw, 44px); padding-left: .15em; cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 .film .contacter { position: absolute; left: 50%; top: 71%; transform: translateX(-50%); font-size: clamp(13px, 2.6cqw, 30px); padding: .65em 1.3em; border-width: 2px; box-shadow: 0 .2em 0 var(--encre); white-space: nowrap; animation: arrive .35s ease-out; }
 .film .contacter:active { transform: translateX(-50%) translateY(3px); }
 @keyframes arrive { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
@@ -149,7 +155,12 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <div class="vitrine">
         <div class="film">
           <video id="film" src="video/playfunnel.mp4" poster="video/affiche.jpg" autoplay muted playsinline preload="auto" aria-label="Vidéo : six problèmes de commerçants, six jeux qui les résolvent"></video>
-          <button class="son" type="button" id="son">🔇 Activer le son</button>
+          <button class="grand-play" type="button" id="grandPlay" aria-label="Lire la vidéo" hidden>▶</button>
+          <div class="commandes">
+            <button type="button" id="lecture" aria-label="Mettre en pause">❚❚</button>
+            <button type="button" id="son" aria-label="Activer le son">🔇</button>
+            <input type="range" id="volume" min="0" max="1" step="0.05" value="0" aria-label="Volume">
+          </div>
           <button class="revoir" type="button" id="revoir" hidden>↺ Revoir</button>
           <a class="btn contacter" href="#contact" id="contacter" hidden>Nous contacter</a>
         </div>
@@ -284,11 +295,24 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   v.addEventListener('ended', function () { contact.hidden = false; revoir.hidden = false; });
   v.addEventListener('play', function () { revoir.hidden = true; });
   revoir.addEventListener('click', function () { v.currentTime = 0; v.play(); });
+  // lecture / pause : bouton de la barre, grand ▶ central quand la vidéo est arrêtée, ou clic sur l'image
+  var lecture = document.getElementById('lecture'), grand = document.getElementById('grandPlay'), volume = document.getElementById('volume');
+  var basculer = function () { if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; v.play(); } else v.pause(); };
+  var majLecture = function () {
+    lecture.textContent = v.paused ? '▶' : '❚❚'; lecture.setAttribute('aria-label', v.paused ? 'Lire la vidéo' : 'Mettre en pause');
+    grand.hidden = !v.paused || (v.duration && v.currentTime > v.duration - 0.3);
+  };
+  lecture.addEventListener('click', basculer); grand.addEventListener('click', basculer); v.addEventListener('click', basculer);
+  ['play', 'pause', 'ended', 'seeked', 'timeupdate'].forEach(function (e) { v.addEventListener(e, majLecture); }); majLecture();
+  // son : bouton muet/actif + curseur de volume ; la 1re activation repart du début, pour que les bruitages suivent l'image
+  var majSon = function () { var muet = v.muted || v.volume === 0; son.textContent = muet ? '🔇' : (v.volume < 0.5 ? '🔉' : '🔊'); son.setAttribute('aria-label', muet ? 'Activer le son' : 'Couper le son'); volume.value = muet ? 0 : v.volume; };
+  var premierSon = function () { if (!son.dejaActive) { son.dejaActive = true; v.currentTime = 0; v.play(); } };
   son.addEventListener('click', function () {
-    v.muted = !v.muted; son.textContent = v.muted ? '🔇 Activer le son' : '🔊 Couper le son';
-    if (!v.muted && !son.dejaActive) { son.dejaActive = true; v.currentTime = 0; v.play(); }   // 1er « son » : on repart du début, les bruitages suivent l'image
-    else if (!v.muted && v.ended) { v.currentTime = 0; v.play(); }
+    if (v.muted || v.volume === 0) { v.muted = false; if (v.volume === 0) v.volume = 1; premierSon(); } else v.muted = true;
+    majSon();
   });
+  volume.addEventListener('input', function () { v.volume = +volume.value; v.muted = v.volume === 0; if (!v.muted) premierSon(); majSon(); });
+  majSon();
   var b = document.getElementById('copier'), a = document.getElementById('adresse');
   b.addEventListener('click', function () {
     var ok = function () { b.textContent = 'Adresse copiée'; setTimeout(function () { b.textContent = "Copier l'adresse"; }, 1800); };
