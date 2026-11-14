@@ -53,7 +53,7 @@ h1 em { font-style: normal; color: var(--accent); }
 .preuves li::before { content: "■ "; color: var(--accent); font-size: 11px; vertical-align: 2px; }
 
 .vitrine { display: grid; justify-items: center; gap: 18px; }
-/* vidéo explicative : lecture auto sans le son ; le bouton « Nous contacter » se pose dans le bas libre de l'écran de fin */
+/* vidéo explicative : lancée au clic (pas de démarrage auto), avec le son ; le bouton « Nous contacter » se pose dans le bas libre de l'écran de fin */
 .film { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 3px solid var(--encre); border-radius: 18px; overflow: hidden; background: #15151d; box-shadow: 12px 12px 0 var(--accent); container-type: inline-size; }
 .film video { width: 100%; height: 100%; display: block; object-fit: cover; }
 .film video { cursor: pointer; }
@@ -154,12 +154,12 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       </div>
       <div class="vitrine">
         <div class="film">
-          <video id="film" src="video/playfunnel.mp4" poster="video/affiche.jpg" autoplay muted playsinline preload="auto" aria-label="Vidéo : six problèmes de commerçants, six jeux qui les résolvent"></video>
-          <button class="grand-play" type="button" id="grandPlay" aria-label="Lire la vidéo" hidden>▶</button>
+          <video id="film" src="video/playfunnel.mp4" poster="video/affiche.jpg" playsinline preload="metadata" aria-label="Vidéo : six problèmes de commerçants, six jeux qui les résolvent"></video>
+          <button class="grand-play" type="button" id="grandPlay" aria-label="Lire la vidéo">▶</button>
           <div class="commandes">
-            <button type="button" id="lecture" aria-label="Mettre en pause">❚❚</button>
-            <button type="button" id="son" aria-label="Activer le son">🔇</button>
-            <input type="range" id="volume" min="0" max="1" step="0.05" value="0" aria-label="Volume">
+            <button type="button" id="lecture" aria-label="Lire la vidéo">▶</button>
+            <button type="button" id="son" aria-label="Couper le son">🔊</button>
+            <input type="range" id="volume" min="0" max="1" step="0.05" value="1" aria-label="Volume">
           </div>
           <button class="revoir" type="button" id="revoir" hidden>↺ Revoir</button>
           <a class="btn contacter" href="#contact" id="contacter" hidden>Nous contacter</a>
@@ -306,7 +306,8 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   ['play', 'pause', 'ended', 'seeked', 'timeupdate'].forEach(function (e) { v.addEventListener(e, majLecture); }); majLecture();
   // son : bouton muet/actif + curseur de volume ; la 1re activation repart du début, pour que les bruitages suivent l'image
   var majSon = function () { var muet = v.muted || v.volume === 0; son.textContent = muet ? '🔇' : (v.volume < 0.5 ? '🔉' : '🔊'); son.setAttribute('aria-label', muet ? 'Activer le son' : 'Couper le son'); volume.value = muet ? 0 : v.volume; };
-  var premierSon = function () { if (!son.dejaActive) { son.dejaActive = true; v.currentTime = 0; v.play(); } };
+  // pas de démarrage auto (14/11) : la vidéo se lance au clic, avec le son, donc plus besoin de repartir du début
+  var premierSon = function () {};
   son.addEventListener('click', function () {
     if (v.muted || v.volume === 0) { v.muted = false; if (v.volume === 0) v.volume = 1; premierSon(); } else v.muted = true;
     majSon();
