@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Playfunnel — mini-jeux marketing par QR code</title>
+<meta name="description" content="Playfunnel crée des mini-jeux à vos couleurs, joués en scannant un QR code : vos clients jouent, vous laissent leur e-mail et reviennent. Délai selon votre projet.">
+<meta property="og:title" content="Playfunnel — mini-jeux marketing par QR code">
+<meta property="og:description" content="Un mini-jeu à vos couleurs. Vos clients scannent, jouent, reviennent.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2315151d'/%3E%3Cpath d='M4 3h5v2h2v4H9v2H6v2H4z' fill='%23ff5a36'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Archivo:wght@500;700;800&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : une colonne éditoriale large, la vidéo explicative à droite du titre ; sections en bandes. */
+:root {
+  --fond: #f5f3ee; --surface: #ffffff; --encre: #15151d; --doux: #5d5b66; --ligne: #e3e0d8;
+  --accent: #ff5a36; --accent-fonce: #d9431f; --vert: #1f8a5b;
+  --titre: "Archivo", "Arial Black", system-ui, sans-serif;
+  --texte: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pixel: "Silkscreen", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fond: #121218; --surface: #1b1b23; --encre: #f1f0f4; --doux: #a9a7b3; --ligne: #2c2b36; --accent: #ff6b4a; --accent-fonce: #ff8566; --vert: #39b37a; color-scheme: dark } }
+:root[data-theme="dark"] { --fond: #121218; --surface: #1b1b23; --encre: #f1f0f4; --doux: #a9a7b3; --ligne: #2c2b36; --accent: #ff6b4a; --accent-fonce: #ff8566; --vert: #39b37a; color-scheme: dark }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--fond); color: var(--encre); font: 17px/1.6 var(--texte); }
+.bande { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.contenu { max-width: 1120px; margin: 0 auto; }
+a { color: inherit; }
+header.bande { padding-block: 18px; position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--fond) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--ligne); }
+header .contenu { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.logo { font-family: var(--pixel); font-weight: 700; font-size: 22px; text-decoration: none; letter-spacing: .02em; }
+.logo span { color: var(--accent); }
+nav { display: flex; gap: 22px; align-items: center; font-size: 15px; }
+nav a { text-decoration: none; color: var(--doux); }
+nav a:hover { color: var(--encre); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 16px var(--texte); text-decoration: none; padding: 13px 20px; border-radius: 10px; border: 2px solid var(--encre); background: var(--accent); color: #fff; box-shadow: 0 4px 0 var(--encre); transition: transform .08s; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--encre); }
+.btn.clair { background: var(--surface); color: var(--encre); }
+.btn:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* HERO */
+.hero { padding-block: 64px 72px; }
+.hero .contenu { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
+.eyebrow { font-family: var(--pixel); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-fonce); margin: 0 0 14px; }
+h1 { font-family: var(--titre); font-weight: 800; font-size: clamp(38px, 4.4vw, 56px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 20px; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--accent); }
+.chapo { font-size: 20px; color: var(--doux); max-width: 34ch; margin: 0 0 28px; }
+.actions { display: flex; flex-wrap: wrap; gap: 14px; }
+.preuves { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 28px; font-size: 15px; color: var(--doux); padding: 0; list-style: none; }
+.preuves li::before { content: "■ "; color: var(--accent); font-size: 11px; vertical-align: 2px; }
+
+.vitrine { display: grid; justify-items: center; gap: 18px; }
+/* vidéo explicative : lancée au clic (pas de démarrage auto), avec le son ; le bouton « Nous contacter » se pose dans le bas libre de l'écran de fin */
+.film { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 3px solid var(--encre); border-radius: 18px; overflow: hidden; background: #15151d; box-shadow: 12px 12px 0 var(--accent); container-type: inline-size; }
+.film video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.film video { cursor: pointer; }
+.film .commandes, .film .revoir { position: absolute; top: 3%; right: 2%; font: 600 clamp(11px, 2cqw, 14px) var(--texte); border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; }
+.film .commandes { display: flex; align-items: center; gap: .3em; padding: .25em .7em .25em .3em; }
+.film .commandes button { font: inherit; font-size: 1.15em; line-height: 1; width: 2em; height: 2em; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+.film .commandes button:hover { background: rgba(255,255,255,.15); }
+.film .commandes input { width: clamp(50px, 14cqw, 110px); accent-color: var(--accent); cursor: pointer; }
+.film .revoir { right: auto; left: 2%; border: 0; padding: .55em 1em; cursor: pointer; }
+.film.finie .commandes, .film.finie .revoir { top: auto; bottom: 4%; }   /* écran de fin : le logo occupe le haut, le bas est libre */
+.film .grand-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(56px, 14cqw, 110px); aspect-ratio: 1; border-radius: 50%; border: 3px solid #fff; background: var(--accent); color: #fff; font-size: clamp(22px, 5.5cqw, 44px); padding-left: .15em; cursor: pointer; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+.film .contacter { position: absolute; left: 50%; top: 71%; transform: translateX(-50%); font-size: clamp(13px, 2.6cqw, 30px); padding: .65em 1.3em; border-width: 2px; box-shadow: 0 .2em 0 var(--encre); white-space: nowrap; animation: arrive .35s ease-out; }
+.film .contacter:active { transform: translateX(-50%) translateY(3px); }
+@keyframes arrive { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
+.telephone { width: min(300px, 82vw); aspect-ratio: 9 / 18.5; border: 10px solid var(--encre); border-radius: 38px; overflow: hidden; background: #000; box-shadow: 14px 14px 0 var(--accent); position: relative; }
+.telephone iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* SECTIONS */
+section.bande { padding-block: 72px; border-top: 1px solid var(--ligne); }
+h2 { font-family: var(--titre); font-weight: 800; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -.015em; margin: 0 0 14px; text-wrap: balance; }
+.intro { color: var(--doux); max-width: 60ch; margin: 0 0 40px; font-size: 18px; }
+.etapes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; counter-reset: e; list-style: none; padding: 0; margin: 0; }
+.etapes li { background: var(--surface); border: 1px solid var(--ligne); border-radius: 14px; padding: 26px 22px; counter-increment: e; }
+.etapes li::before { content: counter(e); display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: var(--encre); color: var(--fond); font-family: var(--pixel); font-size: 18px; margin-bottom: 16px; }
+.etapes h3, .gains h3 { font-family: var(--titre); font-size: 21px; margin: 0 0 8px; }
+.etapes p, .gains p { margin: 0; color: var(--doux); font-size: 16px; }
+.gains { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 40px; }
+.gains div { border-left: 4px solid var(--accent); padding-left: 18px; }
+
+.tarif { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.prix { background: var(--surface); border: 2px solid var(--encre); border-radius: 16px; padding: 28px; box-shadow: 8px 8px 0 var(--encre); }
+.prix .ligne { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-block: 14px; border-bottom: 1px dashed var(--ligne); flex-wrap: wrap; }
+.prix .ligne:last-of-type { border-bottom: 0; }
+.prix .montant { font-family: var(--titre); font-weight: 800; font-size: 40px; font-variant-numeric: tabular-nums; }
+.prix .montant small { font-size: 18px; font-weight: 600; color: var(--doux); }
+.prix ul { margin: 10px 0 0; padding-left: 20px; color: var(--doux); font-size: 15px; }
+.prix .note { margin: 18px 0 0; font-size: 14px; color: var(--doux); }
+
+.puces { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 0; }
+.puces li { border: 1.5px solid var(--encre); border-radius: 999px; padding: 8px 16px; font-size: 15px; background: var(--surface); }
+
+.qui { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 48px; align-items: start; }
+.qui p { color: var(--doux); font-size: 17px; margin: 0 0 14px; max-width: 62ch; }
+.qui p b { color: var(--encre); }
+.atouts { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.atouts li { background: var(--surface); border: 1px solid var(--ligne); border-radius: 14px; padding: 18px 20px; }
+.atouts b { display: block; font-family: var(--titre); font-size: 19px; margin-bottom: 4px; }
+.atouts span { color: var(--doux); font-size: 15px; }
+.probleme { background: var(--surface); border: 2px solid var(--encre); border-radius: 16px; padding: 32px 28px; box-shadow: 8px 8px 0 var(--encre); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; }
+.probleme h2 { margin-bottom: 10px; }
+.probleme ul { margin: 14px 0 0; padding-left: 20px; color: var(--doux); font-size: 16px; }
+.probleme li { margin: 4px 0; }
+.contact .contenu { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center; }
+.mail { font-family: var(--titre); font-weight: 700; font-size: clamp(22px, 3vw, 32px); overflow-wrap: anywhere; user-select: all; }
+.copie { margin-top: 12px; }
+footer.bande { padding-block: 28px; border-top: 1px solid var(--ligne); color: var(--doux); font-size: 14px; }
+footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+@media (max-width: 860px) {
+  nav a:not(.btn) { display: none; }
+  .hero { padding-block: 40px 56px; }
+  .hero .contenu, .tarif, .contact .contenu { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .etapes, .gains, .qui, .probleme { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="bande">
+  <div class="contenu">
+    <a class="logo" href="#">Play<span>funnel</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="#fonctionnement">Comment ça marche</a>
+      <a href="#tarif">Tarif</a>
+      <a href="#aussi">Autres projets</a>
+      <a href="#qui">Qui sommes-nous</a>
+      <a class="btn clair" href="#contact" style="padding:9px 16px;font-size:15px;box-shadow:0 3px 0 var(--encre)">Nous écrire</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="bande hero">
+    <div class="contenu">
+      <div>
+        <p class="eyebrow">1ère agence de jeux marketing du Loir-et-Cher</p>
+        <h1>Un mini-jeu <em>à vos couleurs</em>. Vos clients scannent, jouent… et reviennent.</h1>
+        <p class="chapo">On crée pour votre commerce ou votre marque un jeu de 20 secondes, joué depuis un QR code, qui récompense vos clients et remplit votre fichier clients.</p>
+        <div class="actions">
+          <a class="btn" href="#contact">Parler de votre projet</a>
+        </div>
+        <ul class="preuves">
+          <li>Délai défini ensemble selon votre projet</li>
+          <li>Aucune application à installer</li>
+          <li>Vos couleurs, votre logo, votre récompense</li>
+        </ul>
+      </div>
+      <div class="vitrine">
+        <div class="film">
+          <video id="film" src="video/playfunnel.mp4" poster="video/affiche.jpg" playsinline preload="metadata" aria-label="Vidéo : six problèmes de commerçants, six jeux qui les résolvent"></video>
+          <button class="grand-play" type="button" id="grandPlay" aria-label="Lire la vidéo">▶</button>
+          <div class="commandes">
+            <button type="button" id="lecture" aria-label="Lire la vidéo">▶</button>
+            <button type="button" id="son" aria-label="Couper le son">🔊</button>
+            <input type="range" id="volume" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+          </div>
+          <button class="revoir" type="button" id="revoir" hidden>↺ Revoir</button>
+          <a class="btn contacter" href="#contact" id="contacter" hidden>Nous contacter</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bande" id="fonctionnement">
+    <div class="contenu">
+      <h2>Comment ça marche</h2>
+      <p class="intro">Vous n'avez rien à installer ni à gérer : on s'occupe du jeu, de l'hébergement et des QR codes.</p>
+      <ol class="etapes">
+        <li><h3>On crée votre jeu</h3><p>Vos couleurs, votre logo, vos produits dans le jeu, et la récompense de votre choix : remise, café offert, cadeau, tirage au sort.</p></li>
+        <li><h3>Vous affichez le QR code</h3><p>Au comptoir, en vitrine, sur vos tables, vos tickets, vos flyers ou vos emballages. On vous fournit les fichiers prêts à imprimer.</p></li>
+        <li><h3>Vos clients jouent</h3><p>En 20 secondes, ils gagnent leur récompense et vous laissent leur e-mail, avec leur accord. Ils reviennent l'utiliser chez vous.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bande">
+    <div class="contenu">
+      <h2>Ce que ça vous apporte</h2>
+      <p class="intro">Un jeu, c'est une raison de plus de s'arrêter devant votre vitrine, de revenir, et de parler de vous.</p>
+      <div class="gains">
+        <div><h3>Un fichier clients à vous</h3><p>Chaque partie peut se terminer par un e-mail laissé avec consentement. Ce fichier vous appartient.</p></div>
+        <div><h3>Des clients qui reviennent</h3><p>La récompense s'utilise lors d'une prochaine visite : le jeu crée une raison concrète de repasser.</p></div>
+        <div><h3>Une animation qui se partage</h3><p>Un jeu à vos couleurs se montre, se rejoue et se raconte. Idéal pour un lancement, une fête ou une saison.</p></div>
+        <div><h3>Des chiffres simples</h3><p>Nombre de parties, de récompenses gagnées et d'e-mails collectés : vous savez ce que le jeu vous rapporte.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bande" id="tarif">
+    <div class="contenu tarif">
+      <div>
+        <h2>Un tarif clair</h2>
+        <p class="intro">Une création, puis un petit abonnement qui couvre tout le reste. Pour une marque ou un projet plus ambitieux, on fait un devis sur-mesure.</p>
+      </div>
+      <div class="prix">
+        <div class="ligne"><span>Création de votre jeu</span><span class="montant"><small>à partir de </small>390 €<small> HT</small></span></div>
+        <div class="ligne"><span>Hébergement, QR codes et maintenance</span><span class="montant">29 €<small> HT / mois</small></span></div>
+        <ul>
+          <li>Jeu à vos couleurs, avec vos produits</li>
+          <li>Récompense et e-mails collectés</li>
+          <li>QR codes prêts à imprimer</li>
+          <li>Changement de récompense au fil des saisons</li>
+        </ul>
+        <p class="note"><b>Satisfait ou remboursé :</b> si le jeu ne vous plaît pas, on vous rembourse la création. Prix hors taxes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bande" id="aussi">
+    <div class="contenu">
+      <h2>On crée aussi</h2>
+      <p class="intro">Le jeu marketing n'est qu'un début. Parlez-nous de votre idée :</p>
+      <ul class="puces">
+        <li>Jeux en réalité augmentée</li>
+        <li>Pubs jouables</li>
+        <li>Chasses au trésor et jeux de piste</li>
+        <li>Jeux pour musées et lieux de visite</li>
+        <li>Jeux de recrutement</li>
+        <li>Expériences Roblox, Fortnite, Minecraft</li>
+        <li>Jeux pédagogiques</li>
+        <li>Bornes d'arcade et escape games numériques</li>
+        <li>Outils internes ludiques</li>
+        <li>Applications et vrais jeux vidéo</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bande" id="qui">
+    <div class="contenu qui">
+      <div>
+        <h2>Qui sommes-nous ?</h2>
+        <p>Playfunnel est né chez <b>Game &amp; Disc</b>, une boutique de jeux vidéo indépendante du Loir-et-Cher. Depuis des années, on vit au milieu des jeux : on les achète, on les teste, on les conseille, et on voit chaque jour ce qui fait qu'un joueur accroche… ou décroche au bout de dix secondes.</p>
+        <p>On ne s'est pas arrêtés là : on <b>développe aussi nos propres jeux</b>, sur PC. Conception, graphismes, sons, réglage de la difficulté : on fait tout nous-mêmes.</p>
+        <p>Aujourd'hui, on met ce savoir-faire au service des <b>commerces, des lieux de visite et des marques</b>. Pas de modèle de roue de la fortune recopié à l'infini : un vrai petit jeu, pensé pour votre activité et vos clients, par des gens dont c'est le métier.</p>
+      </div>
+      <ul class="atouts">
+        <li><b>Des joueurs avant tout</b><span>On sait ce qui donne envie de rejouer, et ce qui fait fuir.</span></li>
+        <li><b>Un vrai studio de jeu vidéo</b><span>Les mêmes outils et la même exigence que pour nos jeux sur PC.</span></li>
+        <li><b>Un commerce, comme vous</b><span>On connaît la vitrine, la caisse et les clients qu'on aimerait voir revenir.</span></li>
+        <li><b>Un interlocuteur unique</b><span>Vous parlez directement à la personne qui crée votre jeu.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bande" id="idee">
+    <div class="contenu">
+      <div class="probleme">
+        <div>
+          <h2>Pas d'idée de jeu ? Pas grave.</h2>
+          <p class="intro" style="margin-bottom:0">Vous n'avez pas besoin d'arriver avec un concept. Un problème suffit. Par exemple :</p>
+          <ul>
+            <li>«&nbsp;Mes clients ne laissent jamais leur e-mail.&nbsp;»</li>
+            <li>«&nbsp;Ma nouveauté ne se vend pas.&nbsp;»</li>
+            <li>«&nbsp;Les familles passent devant sans entrer.&nbsp;»</li>
+            <li>«&nbsp;Je n'arrive pas à recruter.&nbsp;»</li>
+          </ul>
+          <p style="margin:16px 0 0;color:var(--doux)">Racontez-le-nous : on en discute, sans engagement, et on vous propose une idée de jeu adaptée.</p>
+        </div>
+        <a class="btn" href="#contact">En discuter avec nous</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bande contact" id="contact">
+    <div class="contenu">
+      <div>
+        <h2>Parlons de votre jeu</h2>
+        <p class="intro" style="margin-bottom:18px">Dites-nous votre commerce ou votre marque, et ce que vous voulez offrir à vos clients. On vous répond avec une proposition.</p>
+        <div class="mail" id="adresse">contact@playfunnel.fr</div>
+        <button class="btn clair copie" type="button" id="copier">Copier l'adresse</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="bande">
+  <div class="contenu">
+    <span>Playfunnel · studio de jeux marketing · Loir-et-Cher, France</span>
+    <span>© 2026 Playfunnel · <a href="mentions-legales.html">Mentions légales</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // vidéo : le bouton « Nous contacter » apparaît une fois le prix affiché sur l'écran de fin (fin - 1,9 s) et y reste
+  var v = document.getElementById('film'), son = document.getElementById('son'), revoir = document.getElementById('revoir'), contact = document.getElementById('contacter');
+  v.addEventListener('timeupdate', function () { if (v.duration) { contact.hidden = v.currentTime < v.duration - 1.9; v.parentNode.classList.toggle('finie', v.currentTime > v.duration - 4.2); revoir.hidden = v.currentTime < v.duration - 0.3; } });
+  v.addEventListener('ended', function () { contact.hidden = false; revoir.hidden = false; });
+  v.addEventListener('play', function () { revoir.hidden = true; });
+  revoir.addEventListener('click', function () { v.currentTime = 0; v.play(); });
+  // lecture / pause : bouton de la barre, grand ▶ central quand la vidéo est arrêtée, ou clic sur l'image
+  var lecture = document.getElementById('lecture'), grand = document.getElementById('grandPlay'), volume = document.getElementById('volume');
+  var basculer = function () { if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; v.play(); } else v.pause(); };
+  var majLecture = function () {
+    lecture.textContent = v.paused ? '▶' : '❚❚'; lecture.setAttribute('aria-label', v.paused ? 'Lire la vidéo' : 'Mettre en pause');
+    grand.hidden = !v.paused || (v.duration && v.currentTime > v.duration - 0.3);
+  };
+  lecture.addEventListener('click', basculer); grand.addEventListener('click', basculer); v.addEventListener('click', basculer);
+  ['play', 'pause', 'ended', 'seeked', 'timeupdate'].forEach(function (e) { v.addEventListener(e, majLecture); }); majLecture();
+  // son : bouton muet/actif + curseur de volume ; la 1re activation repart du début, pour que les bruitages suivent l'image
+  var majSon = function () { var muet = v.muted || v.volume === 0; son.textContent = muet ? '🔇' : (v.volume < 0.5 ? '🔉' : '🔊'); son.setAttribute('aria-label', muet ? 'Activer le son' : 'Couper le son'); volume.value = muet ? 0 : v.volume; };
+  // pas de démarrage auto (14/11) : la vidéo se lance au clic, avec le son, donc plus besoin de repartir du début
+  var premierSon = function () {};
+  son.addEventListener('click', function () {
+    if (v.muted || v.volume === 0) { v.muted = false; if (v.volume === 0) v.volume = 1; premierSon(); } else v.muted = true;
+    majSon();
+  });
+  volume.addEventListener('input', function () { v.volume = +volume.value; v.muted = v.volume === 0; if (!v.muted) premierSon(); majSon(); });
+  majSon();
+  var b = document.getElementById('copier'), a = document.getElementById('adresse');
+  b.addEventListener('click', function () {
+    var ok = function () { b.textContent = 'Adresse copiée'; setTimeout(function () { b.textContent = "Copier l'adresse"; }, 1800); };
+    var repli = function () { var r = document.createRange(); r.selectNodeContents(a); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Adresse sélectionnée'; };
+    try { navigator.clipboard.writeText(a.textContent.trim()).then(ok, repli); } catch (e) { repli(); }
+  });
+})();
+</script>
+</body>
+</html>
