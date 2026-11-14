@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Archivo:wght@500;700;800&family=Work+Sans:wght@400;500;600&display=swap">
 <style>
-/* Mise en page : une colonne éditoriale large, la démo jouable dans un téléphone à droite du titre ; sections en bandes. */
+/* Mise en page : une colonne éditoriale large, la vidéo explicative à droite du titre ; sections en bandes. */
 :root {
   --fond: #f5f3ee; --surface: #ffffff; --encre: #15151d; --doux: #5d5b66; --ligne: #e3e0d8;
   --accent: #ff5a36; --accent-fonce: #d9431f; --vert: #1f8a5b;
@@ -43,9 +43,9 @@ nav a:hover { color: var(--encre); }
 
 /* HERO */
 .hero { padding-block: 64px 72px; }
-.hero .contenu { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 56px; align-items: center; }
+.hero .contenu { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
 .eyebrow { font-family: var(--pixel); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-fonce); margin: 0 0 14px; }
-h1 { font-family: var(--titre); font-weight: 800; font-size: clamp(38px, 5.6vw, 66px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 20px; text-wrap: balance; }
+h1 { font-family: var(--titre); font-weight: 800; font-size: clamp(38px, 4.4vw, 56px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 20px; text-wrap: balance; }
 h1 em { font-style: normal; color: var(--accent); }
 .chapo { font-size: 20px; color: var(--doux); max-width: 34ch; margin: 0 0 28px; }
 .actions { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -53,13 +53,17 @@ h1 em { font-style: normal; color: var(--accent); }
 .preuves li::before { content: "■ "; color: var(--accent); font-size: 11px; vertical-align: 2px; }
 
 .vitrine { display: grid; justify-items: center; gap: 18px; }
+/* vidéo explicative : lecture auto sans le son ; le bouton « Nous contacter » se pose dans le bas libre de l'écran de fin */
+.film { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 3px solid var(--encre); border-radius: 18px; overflow: hidden; background: #15151d; box-shadow: 12px 12px 0 var(--accent); container-type: inline-size; }
+.film video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.film .son, .film .revoir { position: absolute; top: 3%; right: 2%; font: 600 clamp(11px, 2cqw, 14px) var(--texte); padding: .55em 1em; border-radius: 999px; border: 0; background: rgba(0,0,0,.6); color: #fff; cursor: pointer; }
+.film .revoir { right: auto; left: 2%; }
+.film.finie .son, .film.finie .revoir { top: auto; bottom: 4%; }   /* écran de fin : le logo occupe le haut, le bas est libre */
+.film .contacter { position: absolute; left: 50%; top: 71%; transform: translateX(-50%); font-size: clamp(13px, 2.6cqw, 30px); padding: .65em 1.3em; border-width: 2px; box-shadow: 0 .2em 0 var(--encre); white-space: nowrap; animation: arrive .35s ease-out; }
+.film .contacter:active { transform: translateX(-50%) translateY(3px); }
+@keyframes arrive { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
 .telephone { width: min(300px, 82vw); aspect-ratio: 9 / 18.5; border: 10px solid var(--encre); border-radius: 38px; overflow: hidden; background: #000; box-shadow: 14px 14px 0 var(--accent); position: relative; }
 .telephone iframe { width: 100%; height: 100%; border: 0; display: block; }
-.scan { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 2px solid var(--encre); border-radius: 12px; padding: 10px 14px 10px 10px; max-width: 320px; }
-.scan #qr { width: 84px; height: 84px; flex: none; background: #fff; padding: 4px; border-radius: 6px; }
-.scan #qr img, .scan #qr canvas { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
-.scan p { margin: 0; font-size: 14px; line-height: 1.35; }
-.scan b { font-family: var(--pixel); font-weight: 400; font-size: 13px; display: block; margin-bottom: 2px; }
 
 /* SECTIONS */
 section.bande { padding-block: 72px; border-top: 1px solid var(--ligne); }
@@ -134,8 +138,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         <h1>Un mini-jeu <em>à vos couleurs</em>. Vos clients scannent, jouent… et reviennent.</h1>
         <p class="chapo">On crée pour votre commerce ou votre marque un jeu de 20 secondes, joué depuis un QR code, qui récompense vos clients et remplit votre fichier clients.</p>
         <div class="actions">
-          <a class="btn" href="demo/index.html" target="_blank" rel="noopener">Jouer à la démo</a>
-          <a class="btn clair" href="#contact">Parler de votre projet</a>
+          <a class="btn" href="#contact">Parler de votre projet</a>
         </div>
         <ul class="preuves">
           <li>Délai défini ensemble selon votre projet</li>
@@ -144,10 +147,11 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         </ul>
       </div>
       <div class="vitrine">
-        <div class="telephone"><iframe src="demo/index.html" title="Démo jouable : la course aux viennoiseries" loading="lazy"></iframe></div>
-        <div class="scan">
-          <div id="qr" role="img" aria-label="QR code vers la démo"></div>
-          <p><b>Essayez sur votre téléphone</b>Scannez : c'est exactement ce que verront vos clients.</p>
+        <div class="film">
+          <video id="film" src="video/playfunnel.mp4" poster="video/affiche.jpg" autoplay muted playsinline preload="auto" aria-label="Vidéo : six problèmes de commerçants, six jeux qui les résolvent"></video>
+          <button class="son" type="button" id="son">🔇 Activer le son</button>
+          <button class="revoir" type="button" id="revoir" hidden>↺ Revoir</button>
+          <a class="btn contacter" href="#contact" id="contacter" hidden>Nous contacter</a>
         </div>
       </div>
     </div>
@@ -261,7 +265,6 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         <div class="mail" id="adresse">contact@playfunnel.fr</div>
         <button class="btn clair copie" type="button" id="copier">Copier l'adresse</button>
       </div>
-      <a class="btn" href="demo/index.html" target="_blank" rel="noopener">Rejouer la démo</a>
     </div>
   </section>
 </main>
@@ -273,12 +276,19 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   </div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
-  // le QR code mène à la démo de CE site (fonctionne en local comme sur playfunnel.fr)
-  var cible = location.origin + location.pathname.replace(/index\.html$/, '') + 'demo/index.html';
-  try { new QRCode(document.getElementById('qr'), { text: cible, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  // vidéo : le bouton « Nous contacter » apparaît une fois le prix affiché sur l'écran de fin (fin - 1,9 s) et y reste
+  var v = document.getElementById('film'), son = document.getElementById('son'), revoir = document.getElementById('revoir'), contact = document.getElementById('contacter');
+  v.addEventListener('timeupdate', function () { if (v.duration) { contact.hidden = v.currentTime < v.duration - 1.9; v.parentNode.classList.toggle('finie', v.currentTime > v.duration - 4.2); revoir.hidden = v.currentTime < v.duration - 0.3; } });
+  v.addEventListener('ended', function () { contact.hidden = false; revoir.hidden = false; });
+  v.addEventListener('play', function () { revoir.hidden = true; });
+  revoir.addEventListener('click', function () { v.currentTime = 0; v.play(); });
+  son.addEventListener('click', function () {
+    v.muted = !v.muted; son.textContent = v.muted ? '🔇 Activer le son' : '🔊 Couper le son';
+    if (!v.muted && !son.dejaActive) { son.dejaActive = true; v.currentTime = 0; v.play(); }   // 1er « son » : on repart du début, les bruitages suivent l'image
+    else if (!v.muted && v.ended) { v.currentTime = 0; v.play(); }
+  });
   var b = document.getElementById('copier'), a = document.getElementById('adresse');
   b.addEventListener('click', function () {
     var ok = function () { b.textContent = 'Adresse copiée'; setTimeout(function () { b.textContent = "Copier l'adresse"; }, 1800); };
