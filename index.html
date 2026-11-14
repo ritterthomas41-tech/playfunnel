@@ -98,7 +98,8 @@ h1 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 .cadre-film::before { content: ""; position: absolute; inset: -14px; border-radius: 30px; background: conic-gradient(from var(--angle, 0deg), var(--accent), var(--or), var(--violet), var(--accent)); filter: blur(28px); opacity: .45; z-index: -1; animation: tourne 8s linear infinite; }
 @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @keyframes tourne { to { --angle: 360deg; } }
-.etiquette { position: absolute; z-index: 2; font-family: var(--pixel); font-size: 12px; padding: 8px 12px; border-radius: 10px; background: rgba(16,16,23,.85); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px var(--ligne), 0 10px 30px -8px rgba(0,0,0,.7); white-space: nowrap; animation: flotte 5s ease-in-out infinite; }
+.etiquette { position: absolute; z-index: 2; font-family: var(--pixel); font-size: 12px; padding: 8px 12px; border-radius: 10px; background: rgba(16,16,23,.85); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px var(--ligne), 0 10px 30px -8px rgba(0,0,0,.7); white-space: nowrap; animation: flotte 5s ease-in-out infinite; transition: opacity .9s ease, visibility .9s; }
+.cadre-film.lancee .etiquette { opacity: 0; visibility: hidden; }   /* une fois la vidéo lancée, les étiquettes s'effacent pour de bon (jusqu'au rechargement) */
 .etiquette.e1 { top: -22px; left: 24px; color: var(--or); }
 .etiquette.e2 { bottom: -20px; right: 28px; color: #7dffb0; animation-delay: -2.5s; }
 @keyframes flotte { 50% { transform: translateY(-8px); } }
@@ -118,7 +119,7 @@ h1 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 @keyframes arrive { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
 
 /* défilant des autres créations */
-.defile { border-block: 1px solid var(--ligne); background: var(--surface); overflow: hidden; padding: 20px 0; transform: rotate(-1.2deg) scale(1.02); margin: 10px 0 40px; }
+.defile { border-block: 1px solid var(--ligne); background: var(--surface); overflow: hidden; padding: 20px 0; margin: 10px 0 40px; }
 .defile .piste { display: flex; width: max-content; animation: defile 38s linear infinite; }
 .defile ul { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; }
 .defile li { font-family: var(--titre); font-weight: 700; font-size: clamp(20px, 2.4vw, 30px); white-space: nowrap; padding-inline: 26px; display: flex; align-items: center; gap: 52px; }
@@ -327,7 +328,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <h2 class="revele">Une raison de s'arrêter. <span class="degrade">Et de revenir.</span></h2>
       <p class="intro revele">Un jeu, c'est une raison de plus de s'arrêter devant votre vitrine, de revenir, et de parler de vous.</p>
       <div class="bento">
-        <div class="carte large revele"><div class="grand-chiffre">@ à vous</div><h3>Un fichier clients qui vous appartient</h3><p>Chaque partie peut se terminer par un e-mail laissé avec consentement. Ce fichier est à vous, pas à une plateforme.</p></div>
+        <div class="carte large revele"><div class="grand-chiffre">À vous</div><h3>Un fichier clients qui vous appartient</h3><p>Chaque partie peut se terminer par un e-mail laissé avec consentement. Ce fichier est à vous, pas à une plateforme.</p></div>
         <div class="carte revele" style="--d:.1s"><div class="icone">🔁</div><h3>Des clients qui reviennent</h3><p>La récompense s'utilise lors d'une prochaine visite : une raison concrète de repasser.</p></div>
         <div class="carte revele"><div class="icone">📣</div><h3>Une animation qui se partage</h3><p>Un jeu à vos couleurs se montre, se rejoue et se raconte. Idéal pour un lancement, une fête ou une saison.</p></div>
         <div class="carte large revele" style="--d:.1s"><div class="grand-chiffre">20 s</div><h3>Le temps d'une partie</h3><p>Assez court pour qu'on joue sans réfléchir, assez fun pour qu'on ait envie de rejouer.</p></div>
@@ -463,7 +464,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     carte.style.setProperty('--ry', (-8 + x * 16).toFixed(2)); carte.style.setProperty('--rx', (4 - y * 10).toFixed(2));
   });
   // quand la vidéo joue, elle se met bien de face
-  v.addEventListener('play', function () { carte.style.setProperty('--ry', 0); carte.style.setProperty('--rx', 0); carte.dataset.fige = 1; });
+  v.addEventListener('play', function () { carte.style.setProperty('--ry', 0); carte.style.setProperty('--rx', 0); carte.dataset.fige = 1; carte.parentNode.classList.add('lancee'); });
   hero.addEventListener('pointermove', function () { if (carte.dataset.fige && !v.paused) { carte.style.setProperty('--ry', 0); carte.style.setProperty('--rx', 0); } }, true);
 
   // ---------- cartes à projecteur ----------
