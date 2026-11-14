@@ -80,7 +80,7 @@ h1 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 /* machine à sous : les réponses de la vidéo défilent */
 .rouleau { display: block; height: 1.04em; overflow: hidden; position: relative; font-size: var(--taille, 1em); }
 .rouleau span { display: block; height: 1.04em; white-space: nowrap; background: var(--degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.rouleau .piste { display: block; transition: transform .7s cubic-bezier(.65,-0.2,.25,1.35); }
+.rouleau .piste { display: block; height: auto; background: none; transition: transform .7s cubic-bezier(.65,-0.2,.25,1.35); }
 .chapo { font-size: 19px; color: var(--doux); max-width: 44ch; margin: 0 0 34px; }
 .chapo b { color: var(--encre); font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -240,7 +240,8 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   html { scroll-behavior: auto; }
   .js .revele { opacity: 1; transform: none; }
   .etiquette { transition: opacity .9s ease, visibility .9s !important; }
-  .defile .piste { animation: defile 38s linear infinite !important; }   /* le bandeau défile lentement, même avec « animations réduites » : figé, il paraît coupé */   /* un fondu n'est pas un mouvement : on le garde */
+  .defile .piste { animation: defile 38s linear infinite !important; }
+  .rouleau .piste { transition: transform .7s cubic-bezier(.65,-0.2,.25,1.35) !important; }   /* le bandeau défile lentement, même avec « animations réduites » : figé, il paraît coupé */   /* un fondu n'est pas un mouvement : on le garde */
 }
 </style>
 </head>
@@ -265,16 +266,18 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     <div class="contenu">
       <div>
         <p class="badge revele"><b>N°1</b>1ère agence de jeux marketing du Loir-et-Cher</p>
-        <h1 class="revele" style="--d:.08s" id="titre">Un mini-jeu qui
+        <h1 class="revele" style="--d:.08s" id="titre">Un jeu qui
           <span class="rouleau" aria-live="off"><span class="piste" id="piste">
-            <span>fait revenir vos clients.</span>
-            <span>attire la foule.</span>
             <span>capte l'attention.</span>
-            <span>rend la visite amusante.</span>
+            <span>attire la foule.</span>
             <span>fait revenir vos clients.</span>
+            <span>rend la visite amusante.</span>
+            <span>révèle les bons candidats.</span>
+            <span>fait parler de votre marque.</span>
+            <span>capte l'attention.</span>
           </span></span>
         </h1>
-        <p class="chapo revele" style="--d:.16s">Un jeu <b>à vos couleurs</b>, sur téléphone, en boutique ou sur vos réseaux : vos clients jouent, gagnent leur récompense… et vous laissent leur e-mail.</p>
+        <p class="chapo revele" style="--d:.16s">Mini-jeux, réalité augmentée, pubs jouables, chasses au trésor… On crée <b>à vos couleurs</b> le jeu qui attire votre public, l'engage et vous rapporte des résultats mesurables. En boutique, en ligne, au musée ou en entreprise.</p>
         <div class="actions revele" style="--d:.24s">
           <a class="btn" href="#contact">Parler de votre projet <span class="fleche">→</span></a>
           <a class="btn fantome" href="#fonctionnement">Comment ça marche</a>
@@ -320,7 +323,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <h2 class="revele">Trois niveaux. <span class="degrade">Zéro prise de tête.</span></h2>
       <p class="intro revele">Vous n'avez rien à installer ni à gérer : on s'occupe du jeu, de l'hébergement et de sa diffusion.</p>
       <ol class="niveaux">
-        <li class="carte revele" style="--d:0s"><div class="niv">NIVEAU 1 <em>on s'en charge</em></div><div class="pict">🎨</div><h3>On crée votre jeu</h3><p>Vos couleurs, votre logo, vos produits dans le jeu, et la récompense de votre choix : remise, café offert, cadeau, tirage au sort.</p><div class="jauge"><i style="--j:33%"></i></div></li>
+        <li class="carte revele" style="--d:0s"><div class="niv">NIVEAU 1 <em>on s'en charge</em></div><div class="pict">🎨</div><h3>On crée votre jeu</h3><p>Vos couleurs, votre logo, votre univers, et l'objectif de votre choix : attirer, fidéliser, faire découvrir, former ou recruter.</p><div class="jauge"><i style="--j:33%"></i></div></li>
         <li class="carte revele" style="--d:.12s"><div class="niv">NIVEAU 2 <em>2 minutes</em></div><div class="pict">📱</div><h3>Vous le diffusez</h3><p>Un QR code au comptoir, un lien dans votre story, une tablette en boutique, une pub en ligne : on vous fournit tout ce qu'il faut.</p><div class="jauge"><i style="--j:66%"></i></div></li>
         <li class="carte revele" style="--d:.24s"><div class="niv">NIVEAU 3 <em>et vous mesurez</em></div><div class="pict">🏆</div><h3>Votre public joue</h3><p>Clients, visiteurs, candidats ou abonnés : ils jouent, gagnent, s'inscrivent ou se révèlent… et vous suivez les résultats, chiffres à l'appui.</p><div class="jauge"><i style="--j:100%"></i></div></li>
       </ol>
@@ -372,10 +375,10 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         <div class="ligne"><span>Création de votre jeu</span><span class="montant"><small>à partir de </small><span data-compte="390">390</span> €<small> HT</small></span></div>
         <div class="ligne"><span>Hébergement, diffusion et maintenance</span><span class="montant"><span data-compte="29">29</span> €<small> HT / mois</small></span></div>
         <ul>
-          <li>Jeu à vos couleurs, avec vos produits</li>
-          <li>Récompense et e-mails collectés</li>
+          <li>Jeu à vos couleurs, dans votre univers</li>
+          <li>Récompenses et collecte de contacts</li>
           <li>Supports de diffusion fournis (liens, visuels, QR codes)</li>
-          <li>Changement de récompense au fil des saisons</li>
+          <li>Mises à jour au fil de vos campagnes</li>
         </ul>
         <div class="garantie"><span class="sceau">✓</span><div><b>Satisfait ou remboursé</b>Si le jeu ne vous plaît pas, on vous rembourse la création.</div></div>
       </div></div>
@@ -426,7 +429,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     <div class="contenu">
       <p class="surtitre revele">Contact</p>
       <h2 class="revele">Parlons de <span class="degrade">votre jeu.</span></h2>
-      <p class="intro revele">Dites-nous votre commerce ou votre marque, et ce que vous voulez offrir à vos clients. On vous répond avec une proposition.</p>
+      <p class="intro revele">Dites-nous qui vous êtes et ce que vous voulez obtenir : plus de visiteurs, de clients, de contacts ou de candidats. On vous répond avec une proposition.</p>
       <div class="revele"><div class="mail" id="adresse">contact@playfunnel.fr</div></div>
       <div class="actions revele">
         <a class="btn" href="mailto:contact@playfunnel.fr">Écrire un e-mail <span class="fleche">→</span></a>
@@ -476,9 +479,9 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     if (large) r.style.setProperty('--taille', Math.min(1, titre.clientWidth / large * 0.98) + 'em');
   };
   ajuste(); addEventListener('resize', ajuste); if (document.fonts) document.fonts.ready.then(ajuste);
-  if (!calme) setInterval(function () {
+  setInterval(function () {
     k++; piste.style.transform = 'translateY(' + (-k * 100 / (n + 1)) + '%)';
-    if (k === n) setTimeout(function () { piste.style.transition = 'none'; k = 0; piste.style.transform = 'translateY(0)'; piste.offsetHeight; piste.style.transition = ''; }, 750);
+    if (k === n) setTimeout(function () { piste.style.setProperty('transition', 'none', 'important'); k = 0; piste.style.transform = 'translateY(0)'; piste.offsetHeight; piste.style.removeProperty('transition'); }, 750);
   }, 2600);
 
   // ---------- lueur qui suit la souris + vidéo inclinée ----------
