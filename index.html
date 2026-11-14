@@ -222,6 +222,9 @@ h2 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 .mail { display: inline-block; font-family: var(--titre); font-weight: 700; font-size: clamp(24px, 3.6vw, 44px); letter-spacing: -.02em; overflow-wrap: anywhere; user-select: all; padding: 14px 28px; border-radius: 18px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px var(--ligne); margin-bottom: 22px; }
 .contact .actions { justify-content: center; }
 .contact .lueur.a { top: auto; bottom: -260px; right: 50%; transform: translateX(50%); }
+.tel { margin: 0 0 26px; color: var(--doux); font-size: 18px; }
+.tel a { color: var(--encre); font-family: var(--titre); font-weight: 700; font-size: 24px; text-decoration: none; letter-spacing: .01em; white-space: nowrap; }
+.tel a:hover { color: var(--or); }
 #confettis { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
 
 footer { border-top: 1px solid var(--ligne); padding: 28px 0; color: var(--doux); font-size: 14px; }
@@ -441,8 +444,10 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <h2 class="revele">Parlons de <span class="degrade">votre jeu.</span></h2>
       <p class="intro revele">Dites-nous qui vous êtes et ce que vous voulez obtenir : plus de visiteurs, de clients, de contacts ou de candidats. On vous répond avec une proposition.</p>
       <div class="revele"><div class="mail" id="adresse">contact@playfunnel.fr</div></div>
+      <p class="tel revele">ou par téléphone : <a href="tel:+33687562405">06 87 56 24 05</a></p>
       <div class="actions revele">
         <a class="btn" href="mailto:contact@playfunnel.fr">Écrire un e-mail <span class="fleche">→</span></a>
+        <a class="btn fantome" href="tel:+33687562405">📞 Appeler</a>
         <button class="btn fantome" type="button" id="copier">Copier l'adresse</button>
       </div>
     </div>
