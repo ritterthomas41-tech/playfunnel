@@ -581,5 +581,30 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
   });
 })();
 </script>
+<!-- Mesure d'audience (GoatCounter : sans cookie, pas de bandeau à afficher). Le lien perso des relances (?p=nom)
+     apparaît tel quel dans les pages vues ; on compte aussi la lecture de la vidéo et les clics de contact. -->
+<script data-goatcounter="https://playfunnel.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+(function () {
+  var p = new URLSearchParams(location.search).get('p');
+  var evt = function (nom) {
+    var go = function () { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: nom + (p ? '-' + p : ''), title: nom, event: true }); };
+    if (window.goatcounter && window.goatcounter.count) go(); else setTimeout(go, 1500);
+  };
+  var v = document.getElementById('film'), dejaLu = false;
+  if (v) {
+    v.addEventListener('play', function () { if (!dejaLu) { dejaLu = true; evt('video-lecture'); } });
+    v.addEventListener('ended', function () { evt('video-fin'); });
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a, button'); if (!a) return;
+    var h = a.getAttribute('href') || '';
+    if (h.indexOf('mailto:') === 0) evt('clic-email');
+    else if (h.indexOf('tel:') === 0) evt('clic-appel');
+    else if (a.id === 'contacter') evt('clic-nous-contacter-video');
+    else if (a.id === 'copier') evt('clic-copier-adresse');
+  });
+})();
+</script>
 </body>
 </html>
