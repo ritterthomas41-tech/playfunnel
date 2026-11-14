@@ -159,6 +159,11 @@ h2 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 .bento .grand-chiffre { font-family: var(--titre); font-weight: 800; font-size: clamp(54px, 6vw, 88px); line-height: .9; letter-spacing: -.04em; margin-bottom: auto; background: var(--degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .bento .icone { font-size: 34px; margin-bottom: auto; }
 
+/* on crée aussi */
+.tuiles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.tuiles .carte { padding: 20px 20px; font-family: var(--titre); font-weight: 700; font-size: 18px; line-height: 1.25; display: flex; flex-direction: column; gap: 12px; }
+.tuiles .carte span { font-size: 28px; }
+
 /* tarif */
 .tarif { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 60px; align-items: center; }
 .prix { position: relative; border-radius: 26px; padding: 2px; background: conic-gradient(from var(--angle, 0deg), var(--accent), var(--or), var(--violet), var(--accent)); animation: tourne 6s linear infinite; box-shadow: 0 30px 80px -20px rgba(255,90,54,.45); }
@@ -244,6 +249,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     <a class="logo" href="#"><i aria-hidden="true"></i>PLAY<span>FUNNEL</span></a>
     <nav aria-label="Navigation principale">
       <a href="#fonctionnement">Comment ça marche</a>
+      <a href="#aussi">Autres projets</a>
       <a href="#tarif">Tarif</a>
       <a href="#qui">Qui sommes-nous</a>
       <a class="btn" href="#contact">Nous écrire</a>
@@ -275,6 +281,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
           <li>Délai défini ensemble</li>
           <li>Aucune application à installer</li>
           <li>Satisfait ou remboursé</li>
+          <li>Résultats mesurables, chiffres à l'appui</li>
         </ul>
       </div>
       <div class="scene3d revele" style="--d:.2s">
@@ -297,17 +304,12 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     </div>
   </div>
 
-  <div class="defile" id="aussi" aria-label="On crée aussi">
+  <div class="defile" aria-hidden="true">
     <div class="piste">
-      <ul>
-        <li>Jeux en réalité augmentée</li><li>Pubs jouables</li><li>Chasses au trésor</li><li>Jeux pour musées</li><li>Jeux de recrutement</li>
-        <li>Expériences Roblox, Fortnite, Minecraft</li><li>Jeux pédagogiques</li><li>Bornes d'arcade</li><li>Escape games numériques</li><li>Applications et vrais jeux vidéo</li>
-      </ul>
-      <ul aria-hidden="true">
-        <li>Jeux en réalité augmentée</li><li>Pubs jouables</li><li>Chasses au trésor</li><li>Jeux pour musées</li><li>Jeux de recrutement</li>
-        <li>Expériences Roblox, Fortnite, Minecraft</li><li>Jeux pédagogiques</li><li>Bornes d'arcade</li><li>Escape games numériques</li><li>Applications et vrais jeux vidéo</li>
-      </ul>
+      <ul><li>Jeux en réalité augmentée</li><li>Pubs jouables</li><li>Chasses au trésor et jeux de piste</li><li>Jeux pour musées et lieux de visite</li><li>Jeux de recrutement</li><li>Expériences Roblox, Fortnite, Minecraft</li><li>Jeux pédagogiques</li><li>Bornes d'arcade et escape games numériques</li><li>Outils internes ludiques</li><li>Applications et vrais jeux vidéo</li></ul>
+      <ul><li>Jeux en réalité augmentée</li><li>Pubs jouables</li><li>Chasses au trésor et jeux de piste</li><li>Jeux pour musées et lieux de visite</li><li>Jeux de recrutement</li><li>Expériences Roblox, Fortnite, Minecraft</li><li>Jeux pédagogiques</li><li>Bornes d'arcade et escape games numériques</li><li>Outils internes ludiques</li><li>Applications et vrais jeux vidéo</li></ul>
     </div>
+  </div>
   </div>
 
   <section id="fonctionnement">
@@ -318,7 +320,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
       <ol class="niveaux">
         <li class="carte revele" style="--d:0s"><div class="niv">NIVEAU 1 <em>on s'en charge</em></div><div class="pict">🎨</div><h3>On crée votre jeu</h3><p>Vos couleurs, votre logo, vos produits dans le jeu, et la récompense de votre choix : remise, café offert, cadeau, tirage au sort.</p><div class="jauge"><i style="--j:33%"></i></div></li>
         <li class="carte revele" style="--d:.12s"><div class="niv">NIVEAU 2 <em>2 minutes</em></div><div class="pict">📱</div><h3>Vous le diffusez</h3><p>Un QR code au comptoir, un lien dans votre story, une tablette en boutique, une pub en ligne : on vous fournit tout ce qu'il faut.</p><div class="jauge"><i style="--j:66%"></i></div></li>
-        <li class="carte revele" style="--d:.24s"><div class="niv">NIVEAU 3 <em>20 secondes</em></div><div class="pict">🏆</div><h3>Vos clients jouent</h3><p>Ils gagnent leur récompense et vous laissent leur e-mail, avec leur accord. Puis ils reviennent l'utiliser chez vous.</p><div class="jauge"><i style="--j:100%"></i></div></li>
+        <li class="carte revele" style="--d:.24s"><div class="niv">NIVEAU 3 <em>et ils reviennent</em></div><div class="pict">🏆</div><h3>Vos clients jouent</h3><p>Ils gagnent leur récompense et vous laissent leur e-mail, avec leur accord. Puis ils reviennent l'utiliser chez vous.</p><div class="jauge"><i style="--j:100%"></i></div></li>
       </ol>
     </div>
   </section>
@@ -332,8 +334,28 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
         <div class="carte large revele"><div class="grand-chiffre">À vous</div><h3>Un fichier clients qui vous appartient</h3><p>Chaque partie peut se terminer par un e-mail laissé avec consentement. Ce fichier est à vous, pas à une plateforme.</p></div>
         <div class="carte revele" style="--d:.1s"><div class="icone">🔁</div><h3>Des clients qui reviennent</h3><p>La récompense s'utilise lors d'une prochaine visite : une raison concrète de repasser.</p></div>
         <div class="carte revele"><div class="icone">📣</div><h3>Une animation qui se partage</h3><p>Un jeu à vos couleurs se montre, se rejoue et se raconte. Idéal pour un lancement, une fête ou une saison.</p></div>
-        <div class="carte large revele" style="--d:.1s"><div class="grand-chiffre">20 s</div><h3>Le temps d'une partie</h3><p>Assez court pour qu'on joue sans réfléchir, assez fun pour qu'on ait envie de rejouer.</p></div>
+        <div class="carte large revele" style="--d:.1s"><div class="grand-chiffre">Chiffres à l'appui</div><h3>Vous ne pilotez pas à l'aveugle</h3><p>Parties jouées, récompenses gagnées, e-mails collectés : vous voyez ce que votre jeu vous rapporte, en chiffres.</p></div>
       </div>
+    </div>
+  </section>
+
+  <section id="aussi">
+    <div class="contenu">
+      <p class="surtitre revele">On crée aussi</p>
+      <h2 class="revele">Le mini-jeu, <span class="degrade">ce n'est qu'un début.</span></h2>
+      <p class="intro revele">Si ça se joue, on peut le créer. Parlez-nous de votre idée :</p>
+      <ul class="tuiles">
+          <li class="carte revele" style="--d:0.00s"><span>🕶️</span>Jeux en réalité augmentée</li>
+          <li class="carte revele" style="--d:0.05s"><span>📺</span>Pubs jouables</li>
+          <li class="carte revele" style="--d:0.10s"><span>🗺️</span>Chasses au trésor et jeux de piste</li>
+          <li class="carte revele" style="--d:0.15s"><span>🏛️</span>Jeux pour musées et lieux de visite</li>
+          <li class="carte revele" style="--d:0.20s"><span>🧑‍💼</span>Jeux de recrutement</li>
+          <li class="carte revele" style="--d:0.00s"><span>🧱</span>Expériences Roblox, Fortnite, Minecraft</li>
+          <li class="carte revele" style="--d:0.05s"><span>🎓</span>Jeux pédagogiques</li>
+          <li class="carte revele" style="--d:0.10s"><span>🕹️</span>Bornes d'arcade et escape games numériques</li>
+          <li class="carte revele" style="--d:0.15s"><span>🧩</span>Outils internes ludiques</li>
+          <li class="carte revele" style="--d:0.20s"><span>🎮</span>Applications et vrais jeux vidéo</li>
+      </ul>
     </div>
   </section>
 
@@ -341,8 +363,8 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     <div class="contenu tarif">
       <div>
         <p class="surtitre revele">Tarif</p>
-        <h2 class="revele">Un prix clair. <span class="degrade">Sans surprise.</span></h2>
-        <p class="intro revele" style="margin-bottom:0">Une création, puis un petit abonnement qui couvre tout le reste. Pour une marque ou un projet plus ambitieux, on fait un devis sur-mesure.</p>
+        <h2 class="revele">Un prix selon votre projet. <span class="degrade">Fixé avant de commencer.</span></h2>
+        <p class="intro revele" style="margin-bottom:0">Chaque jeu est différent : le prix dépend de ce qu'il doit faire et de sa complexité. Un mini-jeu simple démarre à 390 € HT ; pour le reste, on en parle et vous recevez un devis précis, gratuit et sans engagement, avant le moindre travail.</p>
       </div>
       <div class="prix revele" style="--d:.1s"><div>
         <div class="ligne"><span>Création de votre jeu</span><span class="montant"><small>à partir de </small><span data-compte="390">390</span> €<small> HT</small></span></div>
@@ -380,16 +402,16 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     <div class="contenu">
       <p class="surtitre revele">Pas d'idée de jeu ?</p>
       <h2 class="revele">Pas grave. <span class="degrade">Un problème suffit.</span></h2>
-      <p class="intro revele">Vous n'avez pas besoin d'arriver avec un concept. Cliquez sur un problème : voilà le genre d'idée qu'on vous proposerait.</p>
+      <p class="intro revele">Vous n'avez pas besoin d'arriver avec un concept. Cliquez sur un problème pour voir quelques pistes : la bonne idée dépend de votre activité, de vos clients et de vos envies, et on la trouve ensemble.</p>
       <div class="atelier">
         <div class="problemes revele" id="problemes">
-          <button type="button" aria-pressed="true" data-idee="Un jeu de grattage à vos couleurs : pour découvrir son lot, on laisse son e-mail. Avec plaisir, cette fois.">« Mes clients ne laissent jamais leur e-mail. »</button>
-          <button type="button" aria-pressed="false" data-idee="Votre nouveauté devient la star d'un mini-jeu : on la cherche, on la gagne… et on vient la goûter en boutique.">« Ma nouveauté ne se vend pas. »</button>
-          <button type="button" aria-pressed="false" data-idee="Une chasse au trésor en vitrine : les enfants jouent, trouvent les indices, et entraînent les parents à l'intérieur.">« Les familles passent devant sans entrer. »</button>
-          <button type="button" aria-pressed="false" data-idee="Un mini-jeu qui met les candidats en situation : vous repérez les bons profils avant même l'entretien.">« Je n'arrive pas à recruter. »</button>
+          <button type="button" aria-pressed="true" data-idee="Un jeu de grattage où l'e-mail débloque le lot, un concours du mois avec tirage au sort, une carte de fidélité qui se joue… On choisit ensemble selon vos clients.">« Mes clients ne laissent jamais leur e-mail. »</button>
+          <button type="button" aria-pressed="false" data-idee="Un jeu dont votre nouveauté est la star, une dégustation à gagner, un défi à partager sur les réseaux… On choisit ensemble selon votre produit.">« Ma nouveauté ne se vend pas. »</button>
+          <button type="button" aria-pressed="false" data-idee="Une chasse au trésor en vitrine, un jeu en réalité augmentée pour les enfants, une borne de jeu à l'entrée… On choisit ensemble selon votre lieu.">« Les familles passent devant sans entrer. »</button>
+          <button type="button" aria-pressed="false" data-idee="Un jeu qui met les candidats en situation, un défi qui fait découvrir votre métier, une pub jouable qui attire les bons profils… On choisit ensemble selon le poste.">« Je n'arrive pas à recruter. »</button>
         </div>
         <div class="ecran revele" style="--d:.1s">
-          <div class="haut"><span>IDÉE DE JEU</span><i>● EN LIGNE</i></div>
+          <div class="haut"><span>QUELQUES PISTES</span><i>● EN LIGNE</i></div>
           <p class="idee" id="ideeTexte" aria-live="polite"></p>
           <div class="bas"><a class="btn" href="#contact">En discuter avec nous <span class="fleche">→</span></a></div>
         </div>
