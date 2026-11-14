@@ -81,6 +81,15 @@ h1 .degrade { background: var(--degrade); -webkit-background-clip: text; backgro
 .rouleau { display: block; height: 1.04em; overflow: hidden; position: relative; font-size: var(--taille, 1em); }
 .rouleau span { display: block; height: 1.04em; white-space: nowrap; background: var(--degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .rouleau .piste { display: block; height: auto; background: none; transition: transform .7s cubic-bezier(.65,-0.2,.25,1.35); }
+/* points sous le titre : on fait défiler les promesses soi-même */
+#titre { margin-bottom: 14px; }
+.rouleau { cursor: pointer; }
+.points { display: flex; align-items: center; gap: 6px; margin: 0 0 26px; }
+.points #puces { display: flex; gap: 6px; align-items: center; }
+.points #puces button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 99px; background: rgba(255,255,255,.22); cursor: pointer; transition: width .3s, background .3s; }
+.points #puces button[aria-current="true"] { width: 30px; background: var(--degrade); }
+.points .fl { width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(255,255,255,.06); color: var(--encre); font-size: 18px; line-height: 1; cursor: pointer; box-shadow: inset 0 0 0 1px var(--ligne); }
+.points .fl:hover { background: rgba(255,255,255,.14); }
 .chapo { font-size: 19px; color: var(--doux); max-width: 44ch; margin: 0 0 34px; }
 .chapo b { color: var(--encre); font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -277,6 +286,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
             <span>capte l'attention.</span>
           </span></span>
         </h1>
+        <div class="points revele" style="--d:.12s" id="points" aria-label="Changer de promesse"><button type="button" class="fl" id="avant" aria-label="Promesse précédente">‹</button><span id="puces"></span><button type="button" class="fl" id="apres" aria-label="Promesse suivante">›</button></div>
         <p class="chapo revele" style="--d:.16s">Mini-jeux, réalité augmentée, pubs jouables, chasses au trésor… On crée <b>à vos couleurs</b> le jeu qui attire votre public, l'engage et vous rapporte des résultats mesurables. En boutique, en ligne, au musée ou en entreprise.</p>
         <div class="actions revele" style="--d:.24s">
           <a class="btn" href="#contact">Parler de votre projet <span class="fleche">→</span></a>
@@ -479,10 +489,20 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
     if (large) r.style.setProperty('--taille', Math.min(1, titre.clientWidth / large * 0.98) + 'em');
   };
   ajuste(); addEventListener('resize', ajuste); if (document.fonts) document.fonts.ready.then(ajuste);
-  setInterval(function () {
-    k++; piste.style.transform = 'translateY(' + (-k * 100 / (n + 1)) + '%)';
-    if (k === n) setTimeout(function () { piste.style.setProperty('transition', 'none', 'important'); k = 0; piste.style.transform = 'translateY(0)'; piste.offsetHeight; piste.style.removeProperty('transition'); }, 750);
-  }, 2600);
+  // défilement auto toutes les 4,5 s ; flèches, points ou clic sur la phrase pour défiler soi-même (le minuteur repart à zéro)
+  var puces = document.getElementById('puces'), DUREE = 4500, minuteurTitre;
+  for (var i = 0; i < n; i++) (function (i) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Promesse ' + (i + 1)); b.addEventListener('click', function () { va(i); relance(); }); puces.appendChild(b); })(i);
+  var majPuces = function () { [].forEach.call(puces.children, function (b, i) { b.setAttribute('aria-current', i === k % n); }); };
+  var place = function () { piste.style.transform = 'translateY(' + (-k * 100 / (n + 1)) + '%)'; majPuces(); };
+  var saut = function (vers) { piste.style.setProperty('transition', 'none', 'important'); k = vers; place(); piste.offsetHeight; piste.style.removeProperty('transition'); };
+  var va = function (i) { k = i; place(); };
+  var suivant = function () { k++; place(); if (k === n) setTimeout(function () { if (k === n) saut(0); }, 750); };
+  var precedent = function () { if (k === 0) saut(n); k--; place(); };
+  var relance = function () { clearInterval(minuteurTitre); minuteurTitre = setInterval(suivant, DUREE); };
+  document.getElementById('apres').addEventListener('click', function () { suivant(); relance(); });
+  document.getElementById('avant').addEventListener('click', function () { precedent(); relance(); });
+  piste.parentNode.addEventListener('click', function () { suivant(); relance(); });
+  majPuces(); relance();
 
   // ---------- lueur qui suit la souris + vidéo inclinée ----------
   var hero = document.getElementById('hero'), carte = document.getElementById('carteFilm');
