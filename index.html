@@ -8,7 +8,9 @@
 <meta property="og:title" content="Playfunnel — jeux marketing sur-mesure pour commerces et marques">
 <meta property="og:description" content="Des jeux à vos couleurs qui attirent, fidélisent et font revenir vos clients.">
 <meta name="theme-color" content="#0b0b10">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2315151d'/%3E%3Cpath d='M4 3h5v2h2v4H9v2H6v2H4z' fill='%23ff5a36'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo-carre.png">
+<meta property="og:image" content="https://playfunnel.fr/logo-carre.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Manrope:wght@400;500;600;700&family=Silkscreen&display=swap">
@@ -56,6 +58,7 @@ header { position: fixed; top: 14px; left: 0; right: 0; z-index: 50; padding-inl
 .logo { font-family: var(--pixel); font-size: 20px; text-decoration: none; letter-spacing: .03em; display: flex; align-items: center; gap: 10px; }
 .logo i { width: 12px; height: 12px; background: var(--accent); box-shadow: 0 0 14px var(--accent); animation: clignote 1.2s steps(2) infinite; }
 .logo span { color: var(--accent); }
+.logo img { display: block; height: 46px; width: auto; }   /* logo choisi le 14/11 (n°4, ChatGPT), fond transparent */
 @keyframes clignote { 50% { opacity: .25; } }
 nav { display: flex; gap: 4px; align-items: center; font-size: 15px; }
 nav a:not(.btn) { text-decoration: none; color: var(--doux); padding: 8px 14px; border-radius: 10px; transition: color .2s, background .2s; }
@@ -267,7 +270,7 @@ footer .contenu { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content
 
 <header>
   <div class="barre">
-    <a class="logo" href="#"><i aria-hidden="true"></i>PLAY<span>FUNNEL</span></a>
+    <a class="logo" href="#"><img src="logo.png" alt="Playfunnel" width="84" height="46"></a>
     <nav aria-label="Navigation principale">
       <a href="#fonctionnement">Comment ça marche</a>
       <a href="#aussi">Autres projets</a>
